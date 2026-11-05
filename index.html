@@ -16,8 +16,8 @@
 <script>
 // Setup: replace the two placeholders with Supabase Project URL and anon/publishable key.
 // Never paste a service_role/secret key into this file.
-const SUPABASE_URL='PASTE_SUPABASE_PROJECT_URL_HERE';
-const SUPABASE_ANON_KEY='PASTE_SUPABASE_ANON_OR_PUBLISHABLE_KEY_HERE';
+const SUPABASE_URL='https://vgpsszfbpjvyrqhxifyv.supabase.co';
+sb_publishable_0YCx7-hA9jOMZeucIAKvqA_v5TuVrXP
 let accessToken=null,recordsCache=[];const $=id=>document.getElementById(id);
 function showTab(t){$('verify').classList.toggle('hidden',t!=='verify');$('admin').classList.toggle('hidden',t!=='admin');$('tv').classList.toggle('active',t==='verify');$('ta').classList.toggle('active',t==='admin')}
 function configured(){return SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('PASTE_')&&SUPABASE_ANON_KEY&&!SUPABASE_ANON_KEY.includes('PASTE_')}
