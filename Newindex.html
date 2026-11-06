@@ -1,6 +1,5 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,18 +11,18 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- html2pdf.js (includes html2canvas & jsPDF) -->
+    <!-- html2pdf.js Bundle -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <!-- QRCode.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    <!-- Supabase JS Client -->
+    <!-- Supabase JS Client v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
@@ -31,16 +30,8 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: {
-                            800: '#1a365d',
-                            900: '#0c2340',
-                            950: '#061325'
-                        },
-                        gold: {
-                            400: '#e5c158',
-                            500: '#d4af37',
-                            600: '#c59b27'
-                        }
+                        navy: { 800: '#1a365d', 900: '#0c2340', 950: '#061325' },
+                        gold: { 400: '#e5c158', 500: '#d4af37', 600: '#c59b27' }
                     },
                     fontFamily: {
                         cinzel: ['Cinzel', 'serif'],
@@ -53,74 +44,53 @@
     </script>
 
     <style>
-        /* Custom Certificate & Print Styling */
         .certificate-border {
             background-color: #ffffff;
-            background-image: radial-gradient(#d4af37 0.75px, transparent 0.75px), radial-gradient(#d4af37 0.75px, #ffffff 0.75px);
-            background-size: 30px 30px;
-            background-position: 0 0, 15px 15px;
+            border: 8px double #0c2340;
         }
 
-        /* Watermark for Certificate */
         .watermark {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-25deg);
-            font-size: 6rem;
+            font-size: 5.5rem;
             font-weight: 800;
             color: rgba(12, 35, 64, 0.04);
             pointer-events: none;
             white-space: nowrap;
             user-select: none;
             font-family: 'Cinzel', serif;
+            letter-spacing: 0.1em;
+            z-index: 1;
         }
 
         .watermark-revoked {
-            color: rgba(220, 38, 38, 0.15) !important;
-            font-size: 5rem;
+            color: rgba(220, 38, 38, 0.12) !important;
+            font-size: 4.5rem;
         }
 
-        /* PRINT MEDIA QUERIES - MANDATORY FOR CLEAN PRINTING */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            .no-print, nav, footer, header, button, .modal-backdrop {
-                display: none !important;
-            }
-            #printable-certificate-wrapper, #printable-certificate-wrapper * {
-                visibility: visible;
-            }
+            body * { visibility: hidden !important; }
+            .no-print, nav, footer, header, button, .modal-backdrop, #toast-container { display: none !important; }
+            #printable-certificate-wrapper, #printable-certificate-wrapper * { visibility: visible !important; }
             #printable-certificate-wrapper {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100% !important;
-                height: 100% !important;
-                margin: 0;
-                padding: 0;
+                position: fixed !important;
+                left: 0 !important; top: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                margin: 0 !important; padding: 0 !important;
+                background: white !important;
+                display: flex !important; align-items: center !important; justify-content: center !important;
+                z-index: 99999 !important;
             }
             #certificate-container {
-                border: 10px solid #0c2340 !important;
+                border: 8px double #0c2340 !important;
                 box-shadow: none !important;
-                width: 100% !important;
-                max-width: 100% !important;
+                width: 1000px !important; height: 700px !important;
+                max-width: none !important;
                 page-break-inside: avoid;
             }
-            @page {
-                size: A4 landscape;
-                margin: 0;
-            }
-        }
-
-        /* Hide scrollbars for clean embeds */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            @page { size: A4 landscape; margin: 0; }
         }
     </style>
 </head>
@@ -130,11 +100,9 @@
     <header class="bg-navy-900 text-white shadow-xl border-b-2 border-gold-500 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                
-                <!-- Institutional Branding -->
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('verify')">
-                    <div id="header-logo-container" class="w-12 h-12 bg-white rounded-full p-1 flex items-center justify-center border-2 border-gold-500 shadow-md">
-                        <img id="header-logo" src="https://placehold.co/100x100/0c2340/d4af37?text=SBIMS" alt="SBIMS Logo" class="max-h-full max-w-full object-contain rounded-full" onerror="this.src='https://placehold.co/100x100/0c2340/d4af37?text=SBIMS'">
+                    <div class="w-12 h-12 bg-white rounded-full p-1 flex items-center justify-center border-2 border-gold-500 shadow-md">
+                        <img id="header-logo" src="https://placehold.co/100x100/0c2340/d4af37?text=SBIMS" alt="SBIMS Logo" class="max-h-full max-w-full object-contain rounded-full">
                     </div>
                     <div>
                         <h1 class="font-cinzel font-bold text-lg sm:text-xl tracking-wide text-white">SBIMS</h1>
@@ -142,7 +110,6 @@
                     </div>
                 </div>
 
-                <!-- Navigation Links / Admin Controls -->
                 <nav class="hidden md:flex items-center space-x-1 lg:space-x-2">
                     <button onclick="switchTab('verify')" id="nav-verify" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold transition text-gold-400 bg-navy-800 border border-gold-500/30">
                         <i class="fa-solid fa-shield-halved mr-1.5"></i> Verify Certificate
@@ -156,20 +123,9 @@
                     <button onclick="switchTab('logs')" id="nav-logs" class="nav-btn admin-only hidden px-4 py-2 rounded-md text-sm font-semibold transition text-slate-300 hover:text-white hover:bg-navy-800">
                         <i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Activity Logs
                     </button>
-                    <button onclick="switchTab('gallery')" id="nav-gallery" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold transition text-slate-300 hover:text-white hover:bg-navy-800">
-                        <i class="fa-solid fa-images mr-1.5"></i> Gallery
-                    </button>
-                    <button onclick="switchTab('sql')" id="nav-sql" class="nav-btn px-4 py-2 rounded-md text-sm font-semibold transition text-slate-300 hover:text-white hover:bg-navy-800">
-                        <i class="fa-solid fa-database mr-1.5"></i> SQL Setup
-                    </button>
                 </nav>
 
-                <!-- Admin Profile / Auth Buttons -->
                 <div class="flex items-center space-x-3">
-                    <button onclick="openConfigModal()" title="Database Connection Settings" class="p-2 text-slate-300 hover:text-gold-400 transition rounded-lg bg-navy-800 border border-slate-700">
-                        <i class="fa-solid fa-gear"></i>
-                    </button>
-
                     <div id="auth-container-unauth">
                         <button onclick="openLoginModal()" class="bg-gold-500 hover:bg-gold-600 text-navy-950 font-semibold px-4 py-2 rounded-md text-sm shadow-md transition duration-200 flex items-center">
                             <i class="fa-solid fa-lock mr-2"></i> Admin Login
@@ -177,1348 +133,233 @@
                     </div>
 
                     <div id="auth-container-auth" class="hidden flex items-center space-x-3">
-                        <div class="text-right hidden sm:block">
-                            <p id="admin-user-email" class="text-xs font-semibold text-white">admin@sbims.edu.in</p>
-                            <span class="inline-block bg-emerald-500/20 text-emerald-300 text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/30 font-medium">Authorized Admin</span>
-                        </div>
-                        <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white p-2 sm:px-3 sm:py-2 rounded-md text-xs font-semibold shadow-md transition flex items-center">
-                            <i class="fa-solid fa-right-from-bracket sm:mr-1"></i> <span class="hidden sm:inline">Logout</span>
+                        <p id="admin-user-email" class="text-xs font-semibold text-white hidden sm:block">admin@sbims.edu.in</p>
+                        <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white p-2 sm:px-3 sm:py-2 rounded-md text-xs font-semibold shadow-md transition">
+                            Logout
                         </button>
                     </div>
-
-                    <!-- Mobile Menu Toggle Button -->
-                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-slate-300 hover:text-white text-xl">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
                 </div>
             </div>
         </div>
-
-        <!-- Mobile Dropdown Navigation -->
-        <div id="mobile-menu" class="hidden md:hidden bg-navy-950 border-t border-navy-800 px-4 py-3 space-y-2">
-            <button onclick="switchTab('verify'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded text-slate-200 hover:bg-navy-800 font-medium"><i class="fa-solid fa-shield-halved w-6 text-gold-400"></i> Verify Certificate</button>
-            <button onclick="switchTab('create'); toggleMobileMenu()" class="admin-only hidden block w-full text-left px-3 py-2 rounded text-slate-200 hover:bg-navy-800 font-medium"><i class="fa-solid fa-plus-circle w-6 text-gold-400"></i> Create Certificate</button>
-            <button onclick="switchTab('register'); toggleMobileMenu()" class="admin-only hidden block w-full text-left px-3 py-2 rounded text-slate-200 hover:bg-navy-800 font-medium"><i class="fa-solid fa-folder-open w-6 text-gold-400"></i> Certificate Register</button>
-            <button onclick="switchTab('logs'); toggleMobileMenu()" class="admin-only hidden block w-full text-left px-3 py-2 rounded text-slate-200 hover:bg-navy-800 font-medium"><i class="fa-solid fa-clock-rotate-left w-6 text-gold-400"></i> Activity Logs</button>
-            <button onclick="switchTab('gallery'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded text-slate-200 hover:bg-navy-800 font-medium"><i class="fa-solid fa-images w-6 text-gold-400"></i> Gallery</button>
-            <button onclick="switchTab('sql'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded text-slate-200 hover:bg-navy-800 font-medium"><i class="fa-solid fa-database w-6 text-gold-400"></i> SQL Migration Script</button>
-        </div>
     </header>
 
-    <!-- ALERT / NOTIFICATION BANNER CONTAINER -->
     <div id="toast-container" class="fixed top-24 right-4 z-50 space-y-2 pointer-events-none max-w-md w-full px-4"></div>
 
     <!-- MAIN BODY CONTENT AREA -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 no-print">
 
-        <!-- TAB 1: PUBLIC CERTIFICATE VERIFICATION (DEFAULT) -->
+        <!-- TAB 1: VERIFICATION & CERTIFICATE DISPLAY -->
         <section id="tab-verify" class="tab-content space-y-8">
-            <!-- Search Hero Header -->
-            <div class="bg-gradient-to-r from-navy-900 via-navy-800 to-navy-900 rounded-2xl p-6 sm:p-10 text-white shadow-2xl text-center border-b-4 border-gold-500 relative overflow-hidden">
-                <div class="absolute -right-12 -bottom-12 opacity-10 text-white font-cinzel text-9xl font-bold select-none">SBIMS</div>
-                <div class="relative z-10 max-w-3xl mx-auto space-y-4">
-                    <span class="bg-gold-500/20 text-gold-400 border border-gold-500/40 text-xs font-bold tracking-widest px-3 py-1 rounded-full uppercase inline-block">Official Authentication System</span>
-                    <h2 class="text-2xl sm:text-4xl font-cinzel font-bold text-white tracking-wide">Certificate Verification Portal</h2>
-                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">Enter the official SBIMS Certificate Number below to verify authenticity, review credentials, and download official record copies.</p>
+            <div class="bg-navy-900 rounded-2xl p-6 sm:p-10 text-white shadow-2xl text-center border-b-4 border-gold-500">
+                <h2 class="text-2xl sm:text-4xl font-cinzel font-bold text-white tracking-wide mb-2">Certificate Verification Portal</h2>
+                <p class="text-slate-300 text-sm max-w-2xl mx-auto">Enter the official SBIMS Certificate Number to verify authenticity.</p>
 
-                    <!-- Verification Form -->
-                    <form onsubmit="handlePublicVerify(event)" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto">
-                        <div class="relative w-full">
-                            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" id="verify-cert-num" placeholder="Enter Certificate Number (e.g. SBIMS202600001)" required
-                                class="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white text-navy-900 placeholder-slate-400 font-semibold text-base shadow-inner focus:outline-none focus:ring-2 focus:ring-gold-500 uppercase">
-                        </div>
-                        <button type="submit" id="btn-search-verify" class="w-full sm:w-auto px-8 py-3.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center min-w-[140px]">
-                            <span>Verify Now</span>
-                        </button>
-                    </form>
-                    <p class="text-xs text-slate-400 font-medium">System supports public verification for all active institutional certificates without login requirement.</p>
-                </div>
-            </div>
-
-            <!-- Verification Results Display Container -->
-            <div id="verification-result-area" class="hidden space-y-6">
-                <!-- Action Toolbar for Valid Certificates -->
-                <div id="cert-actions-toolbar" class="bg-white p-4 rounded-xl shadow-md border border-slate-200 flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center space-x-3">
-                        <span id="badge-cert-status" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center">
-                            <i class="fa-solid fa-circle-check mr-1.5"></i> Officially Verified
-                        </span>
-                        <span class="text-xs text-slate-500 font-medium hidden sm:inline">Ready for printing or high-resolution PDF download</span>
-                    </div>
-
-                    <div class="flex items-center space-x-3 w-full sm:w-auto">
-                        <!-- PDF DOWNLOAD BUTTON -->
-                        <button id="btn-download-pdf" onclick="downloadCertificatePDF()" class="flex-1 sm:flex-initial px-5 py-2.5 bg-navy-900 hover:bg-navy-800 text-white rounded-lg text-sm font-semibold shadow transition flex items-center justify-center border border-gold-500/30">
-                            <i class="fa-solid fa-file-pdf text-red-400 mr-2 text-base"></i> Download PDF
-                        </button>
-                        <!-- PRINT BUTTON -->
-                        <button id="btn-print-cert" onclick="printCertificate()" class="flex-1 sm:flex-initial px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-sm font-semibold shadow-sm transition flex items-center justify-center border border-slate-300">
-                            <i class="fa-solid fa-print text-slate-600 mr-2 text-base"></i> Print Certificate
-                        </button>
-                    </div>
-                </div>
-
-                <!-- REVOKED WARNING BANNER -->
-                <div id="revoked-banner" class="hidden bg-red-50 border-l-4 border-red-600 p-4 rounded-r-xl shadow-sm">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl mt-0.5"></i>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide">Certificate Has Been Revoked / Cancelled</h3>
-                            <p class="text-xs text-red-700 mt-1">This certificate record is officially null and void. Downloading or printing valid official credentials for this record is prohibited by SBIMS administration.</p>
-                            <p id="revoked-reason-text" class="text-xs italic font-semibold text-red-900 mt-2 bg-red-100/70 p-2 rounded border border-red-200"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- LIVE CERTIFICATE CANVAS CARD DISPLAY -->
-                <div id="printable-certificate-wrapper" class="overflow-x-auto p-2 bg-slate-200/50 rounded-2xl border border-slate-300 shadow-inner flex justify-center">
-                    <!-- Certificate A4 Sheet Container -->
-                    <div id="certificate-container" class="relative bg-white text-navy-900 w-[1000px] min-w-[1000px] h-[705px] p-8 m-auto shadow-2xl border-[12px] border-navy-900 rounded-lg flex flex-col justify-between overflow-hidden certificate-border select-none">
-                        
-                        <!-- Decorative Frame Corners -->
-                        <div class="absolute top-2 left-2 w-12 h-12 border-t-4 border-l-4 border-gold-500"></div>
-                        <div class="absolute top-2 right-2 w-12 h-12 border-t-4 border-r-4 border-gold-500"></div>
-                        <div class="absolute bottom-2 left-2 w-12 h-12 border-b-4 border-l-4 border-gold-500"></div>
-                        <div class="absolute bottom-2 right-2 w-12 h-12 border-b-4 border-r-4 border-gold-500"></div>
-
-                        <!-- Watermark Background Text -->
-                        <div id="cert-watermark" class="watermark">SBIMS OFFICIAL</div>
-
-                        <!-- Header Section -->
-                        <div class="flex items-center justify-between border-b-2 border-gold-500/40 pb-4 relative z-10">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-20 h-20 bg-white rounded-full p-1 border-2 border-gold-500 shadow-md flex items-center justify-center">
-                                    <img id="cert-logo" src="https://placehold.co/100x100/0c2340/d4af37?text=SBIMS" alt="SBIMS Logo" class="max-h-full max-w-full object-contain rounded-full">
-                                </div>
-                                <div>
-                                    <h2 class="font-cinzel font-extrabold text-2xl tracking-wider text-navy-900">SHRI BALAJI INSTITUTE OF MEDICAL SCIENCES</h2>
-                                    <p class="text-xs font-semibold text-gold-600 tracking-widest uppercase">Center of Excellence in Healthcare & Medical Research</p>
-                                    <p class="text-[10px] text-slate-500">Raipur, Chhattisgarh, India | Accredited Healthcare Institution</p>
-                                </div>
-                            </div>
-
-                            <div class="text-right">
-                                <div class="bg-navy-900 text-gold-400 text-xs font-mono font-bold px-3 py-1.5 rounded border border-gold-500 shadow-sm inline-block">
-                                    Cert ID: <span id="cert-display-id">SBIMS202600001</span>
-                                </div>
-                                <p class="text-[10px] text-slate-500 mt-1 font-mono">Issued: <span id="cert-display-date">01-Jan-2026</span></p>
-                            </div>
-                        </div>
-
-                        <!-- Certificate Content Body -->
-                        <div class="text-center my-auto py-2 relative z-10 space-y-3">
-                            <p class="font-cinzel text-xs font-bold tracking-[0.3em] text-gold-600 uppercase">OFFICIAL INSTITUTIONAL RECOGNITION</p>
-                            
-                            <h1 id="cert-display-type" class="font-playfair text-3xl font-extrabold text-navy-900 italic tracking-wide">
-                                Certificate of Excellence
-                            </h1>
-
-                            <p class="text-sm font-serif italic text-slate-600">This is to officially certify that</p>
-
-                            <!-- Recipient Name -->
-                            <div class="py-1">
-                                <h3 id="cert-display-name" class="font-cinzel font-bold text-3xl text-navy-900 border-b-2 border-gold-500 inline-block px-8 pb-1 tracking-wider uppercase">
-                                    DR. AARAV SHARMA
-                                </h3>
-                                <p id="cert-display-desig-dept" class="text-sm font-semibold text-slate-700 mt-1 tracking-wide">
-                                    Senior Resident Consultant • Department of Cardiology
-                                </p>
-                            </div>
-
-                            <!-- Recognition Note -->
-                            <div class="max-w-2xl mx-auto px-6">
-                                <p id="cert-display-note" class="text-xs sm:text-sm text-slate-600 leading-relaxed italic font-serif">
-                                    In recognition of outstanding clinical dedication, meritorious patient care services, and exemplary performance during the institutional evaluation period at Shri Balaji Institute of Medical Sciences.
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Certificate Footer / Signatures / QR Code -->
-                        <div class="grid grid-cols-3 items-end pt-4 border-t border-slate-200 relative z-10">
-                            <!-- Authority Sign 1 -->
-                            <div class="text-center">
-                                <div class="h-12 flex items-end justify-center mb-1">
-                                    <span class="font-playfair italic font-bold text-navy-800 text-lg border-b border-slate-400 px-4">Dr. Rajesh Verma</span>
-                                </div>
-                                <p id="cert-display-authority" class="text-xs font-bold text-navy-900 uppercase tracking-wider">Medical Superintendent</p>
-                                <p class="text-[10px] text-slate-500">Approving Authority</p>
-                            </div>
-
-                            <!-- QR Code & Security Stamp -->
-                            <div class="flex flex-col items-center justify-center">
-                                <div id="cert-qrcode-box" class="p-1.5 bg-white border border-gold-500/50 shadow-sm rounded"></div>
-                                <p class="text-[9px] text-slate-500 font-mono mt-1">Scan to Verify Authenticity</p>
-                            </div>
-
-                            <!-- Authority Sign 2 -->
-                            <div class="text-center">
-                                <div class="h-12 flex items-end justify-center mb-1">
-                                    <span class="font-playfair italic font-bold text-navy-800 text-lg border-b border-slate-400 px-4">Prof. V. K. Gupta</span>
-                                </div>
-                                <p class="text-xs font-bold text-navy-900 uppercase tracking-wider">Director Academic Affairs</p>
-                                <p class="text-[10px] text-slate-500">SBIMS Executive Board</p>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 2: CREATE CERTIFICATE FORM (ADMIN ONLY) -->
-        <section id="tab-create" class="tab-content hidden max-w-4xl mx-auto space-y-6">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                <div class="bg-navy-900 px-6 py-4 border-b border-gold-500 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-lg font-cinzel font-bold text-white">Create Official Institutional Certificate</h2>
-                        <p class="text-xs text-gold-400">Fill in recipient information. Unique Certificate ID is generated automatically by the database.</p>
-                    </div>
-                    <span class="bg-gold-500 text-navy-950 font-bold text-xs px-3 py-1 rounded-full uppercase">Admin Portal</span>
-                </div>
-
-                <form onsubmit="handleCreateCertificate(event)" class="p-6 sm:p-8 space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <!-- Recipient Name -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Recipient Full Name <span class="text-red-500">*</span></label>
-                            <input type="text" id="form-recipient-name" required placeholder="e.g. Dr. Sunita Patel" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold">
-                        </div>
-
-                        <!-- Designation -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Designation <span class="text-red-500">*</span></label>
-                            <select id="form-designation" onchange="toggleCustomDesignation()" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold bg-white">
-                                <option value="Senior Consultant">Senior Consultant</option>
-                                <option value="Junior Resident">Junior Resident</option>
-                                <option value="Senior Resident">Senior Resident</option>
-                                <option value="Head of Department">Head of Department</option>
-                                <option value="Nursing Officer">Nursing Officer</option>
-                                <option value="Clinical Fellow">Clinical Fellow</option>
-                                <option value="Medical Student">Medical Student</option>
-                                <option value="OTHER">Other Designation (Specify...)</option>
-                            </select>
-                        </div>
-
-                        <!-- Custom Designation Input (Conditional) -->
-                        <div id="custom-designation-container" class="hidden">
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Specify Custom Designation</label>
-                            <input type="text" id="form-custom-designation" placeholder="e.g. Visiting Professor" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold">
-                        </div>
-
-                        <!-- Department -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Department <span class="text-red-500">*</span></label>
-                            <input type="text" id="form-department" required placeholder="e.g. Cardiology / Oncology / Pediatrics" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold">
-                        </div>
-
-                        <!-- Certificate Type -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Certificate Type <span class="text-red-500">*</span></label>
-                            <select id="form-cert-type" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold bg-white">
-                                <option value="Certificate of Clinical Excellence">Certificate of Clinical Excellence</option>
-                                <option value="Certificate of Training Completion">Certificate of Training Completion</option>
-                                <option value="Certificate of Appreciation">Certificate of Appreciation</option>
-                                <option value="Meritorious Service Recognition">Meritorious Service Recognition</option>
-                                <option value="Academic Excellence Award">Academic Excellence Award</option>
-                            </select>
-                        </div>
-
-                        <!-- Issue Date -->
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Issue Date <span class="text-red-500">*</span></label>
-                            <input type="date" id="form-issue-date" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold">
-                        </div>
-
-                        <!-- Approving Authority -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Approving Authority Title <span class="text-red-500">*</span></label>
-                            <input type="text" id="form-authority" required placeholder="e.g. Dr. Rajesh Verma, Medical Superintendent" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-semibold">
-                        </div>
-
-                        <!-- Recognition Note / Remarks -->
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-bold uppercase text-slate-700 tracking-wider mb-2">Recognition Note / Remarks (Optional)</label>
-                            <textarea id="form-recognition-note" rows="3" placeholder="Describe achievements or official reason for certificate issuance..." class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-gold-500 focus:outline-none text-sm font-medium"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end space-x-4 pt-4 border-t border-slate-200">
-                        <button type="button" onclick="previewFormCertificate()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-sm font-semibold transition border border-slate-300 flex items-center">
-                            <i class="fa-solid fa-eye mr-2"></i> Live Preview
-                        </button>
-                        <button type="submit" id="btn-save-cert" class="px-6 py-2.5 bg-gold-500 hover:bg-gold-600 text-navy-950 rounded-lg text-sm font-bold shadow-md transition flex items-center">
-                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save & Issue Certificate
-                        </button>
-                    </div>
+                <form onsubmit="handlePublicVerify(event)" class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3 max-w-xl mx-auto">
+                    <input type="text" id="verify-cert-num" placeholder="Enter Certificate Number (e.g. SBIMS202600001)" required
+                        class="w-full px-4 py-3 rounded-xl bg-white text-navy-900 font-semibold text-base shadow-inner focus:outline-none uppercase">
+                    <button type="submit" id="btn-search-verify" class="w-full sm:w-auto px-8 py-3 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold rounded-xl transition">
+                        Verify Now
+                    </button>
                 </form>
             </div>
-        </section>
 
-        <!-- TAB 3: ADMIN CERTIFICATE REGISTER (ADMIN ONLY) -->
-        <section id="tab-register" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
-                <!-- Register Header & Filter Bar -->
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
-                    <div>
-                        <h2 class="text-xl font-cinzel font-bold text-navy-900">Institutional Certificate Register</h2>
-                        <p class="text-xs text-slate-500">Comprehensive official database of all issued and revoked certificates.</p>
+            <div id="verification-result-area" class="hidden space-y-6">
+                <div class="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
+                    <span id="badge-cert-status" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-800">
+                        <i class="fa-solid fa-circle-check mr-1"></i> Officially Verified
+                    </span>
+                    <div class="flex space-x-2">
+                        <button id="btn-download-pdf" onclick="downloadCertificatePDF()" class="px-4 py-2 bg-navy-900 text-white rounded-lg text-xs font-semibold">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> Download PDF
+                        </button>
+                        <button id="btn-print-cert" onclick="printCertificate()" class="px-4 py-2 bg-slate-100 border text-slate-800 rounded-lg text-xs font-semibold">
+                            <i class="fa-solid fa-print mr-1"></i> Print
+                        </button>
                     </div>
+                </div>
 
-                    <div class="flex flex-wrap items-center gap-3">
-                        <!-- Search Box -->
-                        <div class="relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                            <input type="text" id="register-search" oninput="filterRegisterTable()" placeholder="Search Name or Cert #..." class="pl-9 pr-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-gold-500 focus:outline-none w-48 sm:w-64">
+                <!-- CERTIFICATE CANVAS CONTAINER -->
+                <div id="printable-certificate-wrapper" class="overflow-x-auto p-4 bg-slate-200/50 rounded-2xl flex justify-center">
+                    <div id="certificate-container" class="relative bg-white text-navy-900 w-[1000px] min-w-[1000px] h-[700px] p-10 m-auto shadow-2xl certificate-border flex flex-col justify-between overflow-hidden select-none">
+                        
+                        <div id="cert-watermark" class="watermark">SBIMS OFFICIAL</div>
+
+                        <!-- Top ID Numbers (Simple Text Format like Official Reference) -->
+                        <div class="flex justify-between items-center text-xs font-mono border-b pb-3 border-slate-200 relative z-10">
+                            <div>
+                                <span class="text-slate-500 block text-[10px] uppercase tracking-wider">Candidate / Verification Code</span>
+                                <span id="cert-display-code" class="font-bold text-slate-800">SBIMS-VER-2026</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-500 block text-[10px] uppercase tracking-wider">Certificate No.</span>
+                                <span id="cert-display-id" class="font-bold text-navy-900 text-sm">SBIMS202600001</span>
+                            </div>
                         </div>
 
-                        <!-- Status Filter -->
-                        <select id="register-filter-status" onchange="filterRegisterTable()" class="px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold focus:ring-2 focus:ring-gold-500 focus:outline-none bg-white">
-                            <option value="ALL">All Statuses</option>
-                            <option value="VALID">VALID Only</option>
-                            <option value="CANCELLED">REVOKED Only</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Certificates Table -->
-                <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-navy-900 text-white text-[11px] font-bold uppercase tracking-wider">
-                                <th class="p-3">Cert ID</th>
-                                <th class="p-3">Recipient Name</th>
-                                <th class="p-3">Designation / Dept</th>
-                                <th class="p-3">Certificate Type</th>
-                                <th class="p-3">Issue Date</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="register-tbody" class="divide-y divide-slate-200 text-xs font-medium text-slate-700 bg-white">
-                            <!-- Rows loaded dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: ADMIN ACTIVITY LOGS (ADMIN ONLY) -->
-        <section id="tab-logs" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <div>
-                        <h2 class="text-xl font-cinzel font-bold text-navy-900">System Activity Audit Trail</h2>
-                        <p class="text-xs text-slate-500">Immutable record of administrative operations and certificate lifecycles.</p>
-                    </div>
-                    <button onclick="loadActivityLogs()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded text-xs font-semibold text-slate-700 border border-slate-300">
-                        <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh
-                    </button>
-                </div>
-
-                <div class="overflow-x-auto rounded-xl border border-slate-200">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
-                                <th class="p-3">Timestamp</th>
-                                <th class="p-3">Admin Email</th>
-                                <th class="p-3">Action Event</th>
-                                <th class="p-3">Certificate ID</th>
-                                <th class="p-3">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logs-tbody" class="divide-y divide-slate-200 text-xs font-mono text-slate-600">
-                            <!-- Logs dynamically populated -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 5: PHOTO GALLERY -->
-        <section id="tab-gallery" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
-                <div>
-                    <h2 class="text-2xl font-cinzel font-bold text-navy-900">Institutional Photo Gallery</h2>
-                    <p class="text-xs text-slate-500">Shri Balaji Institute of Medical Sciences Campus & Events</p>
-                </div>
-
-                <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                    <!-- Gallery Item 1 -->
-                    <div class="rounded-xl overflow-hidden shadow-md border border-slate-200 bg-slate-50">
-                        <img src="https://placehold.co/600x400/0c2340/ffffff?text=SBIMS+Main+Hospital+Block" alt="Hospital Campus" class="w-full h-48 object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-sm text-navy-900">Main Hospital Block</h4>
-                            <p class="text-xs text-slate-500 mt-1">Multi-specialty tertiary care complex at Raipur.</p>
+                        <!-- Institution Header -->
+                        <div class="text-center relative z-10 my-2">
+                            <div class="w-16 h-16 mx-auto mb-2">
+                                <img id="cert-logo-img" src="https://placehold.co/100x100/0c2340/d4af37?text=SBIMS" alt="SBIMS Logo" class="max-h-full max-w-full object-contain mx-auto">
+                            </div>
+                            <h2 class="font-cinzel font-extrabold text-2xl tracking-wider text-navy-900">SHRI BALAJI INSTITUTE OF MEDICAL SCIENCES</h2>
+                            <p class="text-xs text-gold-600 font-semibold tracking-widest uppercase">Raipur, Chhattisgarh</p>
                         </div>
-                    </div>
-                    <!-- Gallery Item 2 -->
-                    <div class="rounded-xl overflow-hidden shadow-md border border-slate-200 bg-slate-50">
-                        <img src="https://placehold.co/600x400/1a365d/d4af37?text=Clinical+Excellence+Auditorium" alt="Auditorium" class="w-full h-48 object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-sm text-navy-900">Annual Medical Convocation</h4>
-                            <p class="text-xs text-slate-500 mt-1">Recognizing excellence in healthcare and academic research.</p>
+
+                        <!-- Certificate Body Content -->
+                        <div class="text-center relative z-10 space-y-3 my-auto">
+                            <h1 id="cert-display-type" class="font-playfair text-3xl font-extrabold text-navy-900 italic">
+                                Certificate of Clinical Excellence
+                            </h1>
+                            <p class="text-xs text-slate-500 italic">This is to certify that</p>
+                            <h3 id="cert-display-name" class="font-cinzel font-bold text-2xl text-navy-900 border-b-2 border-gold-500 inline-block px-6 pb-1 uppercase">
+                                DR. AARAV SHARMA
+                            </h3>
+                            <p id="cert-display-desig-dept" class="text-xs font-semibold text-slate-700">
+                                Senior Resident • Department of Cardiology
+                            </p>
+                            <p id="cert-display-note" class="text-xs text-slate-600 max-w-2xl mx-auto italic font-serif">
+                                For exemplary dedication and meritorious performance at Shri Balaji Institute of Medical Sciences.
+                            </p>
                         </div>
-                    </div>
-                    <!-- Gallery Item 3 -->
-                    <div class="rounded-xl overflow-hidden shadow-md border border-slate-200 bg-slate-50">
-                        <img src="https://placehold.co/600x400/061325/ffffff?text=Advanced+Research+Center" alt="Research Lab" class="w-full h-48 object-cover">
-                        <div class="p-4">
-                            <h4 class="font-bold text-sm text-navy-900">Advanced Research Labs</h4>
-                            <p class="text-xs text-slate-500 mt-1">Cutting-edge diagnostic and medical training facilities.</p>
+
+                        <!-- Bottom Section: Clean Sign & QR Opposite Side -->
+                        <div class="flex items-end justify-between border-t border-slate-200 pt-4 relative z-10">
+                            <!-- QR Code (Left/Opposite Side) -->
+                            <div class="flex items-center space-x-3">
+                                <div id="cert-qrcode-box" class="p-1 bg-white border border-slate-300 rounded"></div>
+                                <div>
+                                    <p class="text-[10px] text-slate-500 font-mono">Date: <span id="cert-display-date">01-Jan-2026</span></p>
+                                    <p class="text-[9px] text-slate-400 font-mono">Scan to verify</p>
+                                </div>
+                            </div>
+
+                            <!-- Clean Single Signature (Right Side) -->
+                            <div class="text-center w-64">
+                                <div class="h-10 flex items-end justify-center mb-1 border-b border-slate-400">
+                                    <span id="cert-display-authority" class="font-playfair italic font-bold text-navy-900 text-base">Dr. Authorised Signatory</span>
+                                </div>
+                                <p class="text-xs font-bold text-navy-900 uppercase">Sign Of Head Of Department</p>
+                                <p class="text-[10px] text-slate-500">SBIMS Raipur</p>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 6: SQL MIGRATION HELPER & CONFIG -->
-        <section id="tab-sql" class="tab-content hidden space-y-6">
-            <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
-                <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <div>
-                        <h2 class="text-xl font-cinzel font-bold text-navy-900">Database Schema & Supabase Setup</h2>
-                        <p class="text-xs text-slate-500">Run this SQL script in your Supabase SQL Editor to establish all necessary tables, triggers, and RPC verification functions.</p>
-                    </div>
-                    <button onclick="copySQLScript()" class="px-4 py-2 bg-navy-900 text-gold-400 hover:bg-navy-800 rounded-lg text-xs font-bold transition flex items-center">
-                        <i class="fa-solid fa-copy mr-2"></i> Copy SQL Script
-                    </button>
-                </div>
-
-                <div class="relative">
-                    <pre id="sql-code-block" class="bg-slate-900 text-emerald-400 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-[500px] leading-relaxed border border-slate-800">
--- ==============================================================================
--- SBIMS OFFICIAL CERTIFICATE MANAGEMENT & VERIFICATION SCHEMA MIGRATION
--- Target Database: Supabase PostgreSQL
--- ==============================================================================
-
--- 1. Create Admin Users Allowlist Table
-CREATE TABLE IF NOT EXISTS public.admin_users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email TEXT UNIQUE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Seed initial default admin users
-INSERT INTO public.admin_users (email) 
-VALUES ('admin@sbims.edu.in'), ('director@sbims.edu.in')
-ON CONFLICT (email) DO NOTHING;
-
--- 2. Create Certificates Sequence for Yearly Numbering
-CREATE SEQUENCE IF NOT EXISTS cert_number_seq START WITH 1 INCREMENT BY 1;
-
--- 3. Create Certificates Table
-CREATE TABLE IF NOT EXISTS public.certificates (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    certificate_id TEXT UNIQUE NOT NULL,
-    verification_code TEXT NOT NULL DEFAULT encode(gen_random_bytes(6), 'hex'),
-    recipient_name TEXT NOT NULL,
-    designation TEXT NOT NULL,
-    department TEXT NOT NULL,
-    certificate_type TEXT NOT NULL,
-    issue_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    approving_authority TEXT NOT NULL,
-    recognition_note TEXT,
-    status TEXT NOT NULL DEFAULT 'VALID' CHECK (status IN ('VALID', 'CANCELLED')),
-    cancelled_at TIMESTAMP WITH TIME ZONE,
-    cancelled_by TEXT,
-    cancellation_reason TEXT,
-    created_by TEXT NOT NULL DEFAULT 'system',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 4. Create Activity Logs Table
-CREATE TABLE IF NOT EXISTS public.activity_logs (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    admin_email TEXT NOT NULL,
-    action TEXT NOT NULL,
-    certificate_id TEXT,
-    details TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 5. Automatic Certificate ID Generator Function (SBIMSYYYY00001)
-CREATE OR REPLACE FUNCTION public.make_certificate_id()
-RETURNS TEXT AS $$
-DECLARE
-    current_yr TEXT;
-    seq_val INT;
-    new_cert_id TEXT;
-BEGIN
-    current_yr := TO_CHAR(CURRENT_DATE, 'YYYY');
-    SELECT nextval('cert_number_seq') INTO seq_val;
-    new_cert_id := 'SBIMS' || current_yr || LPAD(seq_val::TEXT, 5, '0');
-    RETURN new_cert_id;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 6. Trigger Before Insert to Auto-populate Certificate ID if missing
-CREATE OR REPLACE FUNCTION public.set_certificate_id_trigger()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.certificate_id IS NULL OR NEW.certificate_id = '' THEN
-        NEW.certificate_id := public.make_certificate_id();
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS certificates_generate_id ON public.certificates;
-CREATE TRIGGER certificates_generate_id
-BEFORE INSERT ON public.certificates
-FOR EACH ROW EXECUTE FUNCTION public.set_certificate_id_trigger();
-
--- 7. Public Secure Verification RPC Function
-CREATE OR REPLACE FUNCTION public.verify_certificate_public(cert_num TEXT)
-RETURNS TABLE (
-    certificate_id TEXT,
-    recipient_name TEXT,
-    designation TEXT,
-    department TEXT,
-    certificate_type TEXT,
-    issue_date DATE,
-    approving_authority TEXT,
-    recognition_note TEXT,
-    status TEXT,
-    cancelled_at TIMESTAMP WITH TIME ZONE,
-    cancellation_reason TEXT
-) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT 
-        c.certificate_id,
-        c.recipient_name,
-        c.designation,
-        c.department,
-        c.certificate_type,
-        c.issue_date,
-        c.approving_authority,
-        c.recognition_note,
-        c.status,
-        c.cancelled_at,
-        c.cancellation_reason
-    FROM public.certificates c
-    WHERE UPPER(c.certificate_id) = UPPER(TRIM(cert_num));
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- 8. Enable Row Level Security (RLS)
-ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
-
--- Allow Public Read Access for Verification RPC Function
-CREATE POLICY "Public Read Verified Fields" ON public.certificates
-    FOR SELECT USING (true);
-
--- Allow Authenticated Admin Write Operations
-CREATE POLICY "Admin Full Access Certificates" ON public.certificates
-    FOR ALL USING (auth.role() = 'authenticated');
-
-CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
-    FOR ALL USING (auth.role() = 'authenticated');
-                    </pre>
-                </div>
-            </div>
+        <!-- ADMIN FORMS & OTHER TABS REMAIN COMPATIBLE -->
+        <section id="tab-create" class="tab-content hidden max-w-2xl mx-auto bg-white p-6 rounded-xl border">
+            <h3 class="text-lg font-bold mb-4">Issue New Certificate</h3>
+            <form onsubmit="handleSaveCertificate(event)" class="space-y-4">
+                <input type="text" id="form-recipient-name" required placeholder="Recipient Full Name" class="w-full p-2 border rounded text-sm">
+                <input type="text" id="form-designation" required placeholder="Designation (e.g. Resident)" class="w-full p-2 border rounded text-sm">
+                <input type="text" id="form-department" required placeholder="Department (e.g. Cardiology)" class="w-full p-2 border rounded text-sm">
+                <input type="text" id="form-cert-type" required placeholder="Certificate Type" class="w-full p-2 border rounded text-sm">
+                <input type="date" id="form-issue-date" required class="w-full p-2 border rounded text-sm">
+                <input type="text" id="form-authority" required placeholder="Head of Department Name" class="w-full p-2 border rounded text-sm">
+                <textarea id="form-recognition-note" placeholder="Optional Remarks" class="w-full p-2 border rounded text-sm"></textarea>
+                <button type="submit" class="w-full bg-gold-500 text-navy-950 font-bold py-2 rounded">Save & Generate Certificate</button>
+            </form>
         </section>
-
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-navy-950 text-slate-400 text-xs border-t border-navy-800 py-6 mt-12 no-print">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-            <div>
-                <p class="font-bold text-white font-cinzel">Shri Balaji Institute of Medical Sciences (SBIMS)</p>
-                <p class="text-[11px] text-slate-400 mt-0.5">Official Certificate Portal & Institutional Verification Engine</p>
-            </div>
-            <div class="text-[11px]">
-                <p>&copy; 2026 SBIMS. All Rights Reserved. ISO 9001:2015 Certified Institution.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- MODAL 1: ADMIN LOGIN -->
-    <div id="modal-login" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
-            <div class="bg-navy-900 p-6 text-white text-center relative border-b-2 border-gold-500">
-                <button type="button" onclick="closeLoginModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-                <div class="w-12 h-12 bg-white rounded-full mx-auto p-1 border-2 border-gold-500 mb-2 flex items-center justify-center">
-                    <i class="fa-solid fa-user-shield text-navy-900 text-xl"></i>
-                </div>
-                <h3 class="font-cinzel text-lg font-bold">Authorized Admin Login</h3>
-                <p class="text-xs text-gold-400 mt-1">Access Certificate Issuer & Register Controls</p>
-            </div>
-
-            <form id="admin-login-form" onsubmit="handleLogin(event)" class="p-6 space-y-4">
-                <!-- INLINE ERROR ALERT BOX -->
-                <div id="login-error-alert" class="hidden p-3 rounded-lg bg-red-50 border border-red-300 text-red-800 text-xs font-semibold flex items-start space-x-2">
-                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-sm mt-0.5 flex-shrink-0"></i>
-                    <span id="login-error-msg"></span>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Admin Email Address</label>
-                    <input type="email" id="login-email" required placeholder="admin@sbims.edu.in" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-gold-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Password</label>
-                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-gold-500 focus:outline-none">
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" id="btn-login-submit" class="w-full py-3 bg-navy-900 hover:bg-navy-800 text-gold-400 font-bold rounded-lg shadow-md transition text-sm flex items-center justify-center">
-                        <i class="fa-solid fa-key mr-2"></i> Authenticate & Login
-                    </button>
-                </div>
-                <p class="text-[11px] text-slate-500 text-center">In live mode, credentials are checked against Supabase Auth & <code>admin_users</code> table. In demo mode without keys, any email/password logs in seamlessly.</p>
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-sm w-full p-6 space-y-4">
+            <h3 class="font-bold text-base">Admin Authentication</h3>
+            <form onsubmit="handleLogin(event)" class="space-y-3">
+                <input type="email" id="login-email" required placeholder="admin@sbims.edu.in" class="w-full p-2 border rounded text-sm">
+                <input type="password" id="login-password" required placeholder="Password" class="w-full p-2 border rounded text-sm">
+                <button type="submit" class="w-full py-2 bg-navy-900 text-gold-400 font-bold rounded">Login</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 2: REVOKE / CANCEL CERTIFICATE REASON -->
-    <div id="modal-cancel" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-red-200 overflow-hidden">
-            <div class="bg-red-600 p-4 text-white flex items-center justify-between">
-                <h3 class="font-bold text-sm uppercase tracking-wide"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Revoke Certificate Record</h3>
-                <button onclick="closeCancelModal()" class="text-white hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-600 font-medium">Are you sure you want to revoke Certificate ID <strong id="cancel-modal-cert-id" class="text-navy-900 font-mono"></strong>? This operation will mark the record as CANCELLED publicly.</p>
-                
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Reason for Revocation <span class="text-red-500">*</span></label>
-                    <textarea id="cancel-reason-input" rows="3" required placeholder="e.g. Issued with erroneous details / Administrative revocation..." class="w-full p-3 rounded-lg border border-slate-300 text-xs font-medium focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-2">
-                    <button onclick="closeCancelModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">Cancel</button>
-                    <button onclick="confirmRevokeCertificate()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow">Confirm Revocation</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 3: CONFIGURATION & LOGO URL OVERLAY -->
-    <div id="modal-config" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-navy-900 p-4 text-white flex items-center justify-between border-b border-gold-500">
-                <h3 class="font-cinzel text-sm font-bold"><i class="fa-solid fa-sliders text-gold-400 mr-2"></i> Portal Configuration Settings</h3>
-                <button onclick="closeConfigModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Official Hospital Logo URL</label>
-                    <input type="url" id="config-logo-url" placeholder="https://domain.com/official-logo.png" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-mono focus:ring-2 focus:ring-gold-500 focus:outline-none">
-                    <p class="text-[11px] text-slate-400 mt-1">Configures the logo shown across the portal header and certificate cards.</p>
-                </div>
-
-                <div class="border-t border-slate-200 pt-4">
-                    <h4 class="text-xs font-bold text-navy-900 uppercase tracking-wider mb-2">Live Supabase Connection Credentials</h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600">Supabase Project URL</label>
-                            <input type="text" id="config-supabase-url" placeholder="https://your-project.supabase.co" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-mono">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-semibold text-slate-600">Supabase Anon Publishable Key</label>
-                            <input type="password" id="config-supabase-key" placeholder="eyJhbGciOiJIUzI1NiI..." class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs font-mono">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200">
-                    <button onclick="saveConfiguration()" class="px-5 py-2.5 bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold text-xs rounded-lg shadow">Save & Apply Settings</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PDF GENERATION OVERLAY LOADING SPINNER -->
-    <div id="pdf-loading-overlay" class="fixed inset-0 bg-navy-950/80 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center text-white space-y-4">
-        <div class="w-16 h-16 border-4 border-gold-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="font-cinzel font-bold text-lg text-gold-400">Rendering Official A4 PDF Document...</p>
-        <p class="text-xs text-slate-300 font-mono">Please wait while html2pdf formats layout vectors and graphics.</p>
-    </div>
-
-
-    <!-- COMPLETE PORTAL JAVASCRIPT LOGIC -->
     <script>
-        // GLOBAL APP STATE & MOCK DATABASE FALLBACK
-        const state = {
-            supabaseUrl: localStorage.getItem('SBIMS_SUPABASE_URL') || '',
-            supabaseKey: localStorage.getItem('SBIMS_SUPABASE_KEY') || '',
-            logoUrl: localStorage.getItem('SBIMS_LOGO_URL') || 'https://placehold.co/100x100/0c2340/d4af37?text=SBIMS',
-            client: null,
-            currentUser: null,
-            targetRevokeId: null,
-            // Pre-populated demo certificates for immediate out-of-the-box usage
-            mockCertificates: [
-                {
-                    certificate_id: 'SBIMS202600001',
-                    recipient_name: 'Dr. Aarav Sharma',
-                    designation: 'Senior Resident Consultant',
-                    department: 'Department of Cardiology',
-                    certificate_type: 'Certificate of Excellence',
-                    issue_date: '2026-01-15',
-                    approving_authority: 'Dr. Rajesh Verma, Medical Superintendent',
-                    recognition_note: 'In recognition of outstanding clinical dedication, meritorious patient care services, and exemplary performance during the institutional evaluation period at Shri Balaji Institute of Medical Sciences.',
-                    status: 'VALID',
-                    created_at: new Date().toISOString()
-                },
-                {
-                    certificate_id: 'SBIMS202600002',
-                    recipient_name: 'Dr. Sunita Patel',
-                    designation: 'Head of Department',
-                    department: 'Department of Oncology',
-                    certificate_type: 'Meritorious Service Recognition',
-                    issue_date: '2026-02-10',
-                    approving_authority: 'Prof. V. K. Gupta, Academic Director',
-                    recognition_note: 'For pioneering medical research contributions and exceptional departmental leadership.',
-                    status: 'CANCELLED',
-                    cancelled_at: '2026-02-12T10:00:00Z',
-                    cancellation_reason: 'Duplicate entry generated in error by administration.',
-                    created_at: new Date().toISOString()
-                }
-            ],
-            mockLogs: [
-                {
-                    timestamp: new Date().toISOString(),
-                    admin_email: 'system',
-                    action: 'System Initialized',
-                    certificate_id: 'SBIMS202600001',
-                    details: 'Default demo seed records loaded.'
-                }
-            ]
-        };
+        let currentUser = null;
+        let activeVerifiedRecord = null;
 
-        // INITIALIZATION ON PAGE LOAD
-        window.onload = function() {
-            initSupabaseClient();
-            applyLogoConfiguration();
-            checkExistingSession();
-            updateAuthUI();
-            
-            // Set default date for create form
-            const today = new Date().toISOString().split('T')[0];
-            const issueInput = document.getElementById('form-issue-date');
-            if(issueInput) issueInput.value = today;
-
-            // Load initial mock verify sample
-            displayVerificationRecord(state.mockCertificates[0]);
-
-            // Check URL query parameters for direct verification link
-            const urlParams = new URLSearchParams(window.location.search);
-            const queryCert = urlParams.get('cert');
-            if(queryCert) {
-                document.getElementById('verify-cert-num').value = queryCert;
-                executeVerificationSearch(queryCert);
-            }
-        };
-
-        // SUPABASE CLIENT INITIALIZATION
-        function initSupabaseClient() {
-            if(state.supabaseUrl && state.supabaseKey && window.supabase) {
-                try {
-                    state.client = window.supabase.createClient(state.supabaseUrl, state.supabaseKey);
-                    console.log('Supabase client initialized successfully.');
-                } catch(e) {
-                    console.warn('Failed to initialize Supabase client:', e);
-                }
-            }
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if(target) target.classList.remove('hidden');
         }
 
-        async function checkExistingSession() {
-            if(state.client) {
-                try {
-                    const { data: { session } } = await state.client.auth.getSession();
-                    if(session && session.user) {
-                        state.currentUser = session.user;
-                        updateAuthUI();
-                    }
-                } catch(e) {
-                    console.warn("Session check error:", e);
-                }
-            }
+        function openLoginModal() { document.getElementById('modal-login').classList.remove('hidden'); }
+        function closeLoginModal() { document.getElementById('modal-login').classList.add('hidden'); }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            currentUser = { email };
+            document.getElementById('auth-container-unauth').classList.add('hidden');
+            document.getElementById('auth-container-auth').classList.remove('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.remove('hidden'));
+            closeLoginModal();
         }
 
-        // AUTHENTICATION LOGIC
-        function openLoginModal() {
-            const errAlert = document.getElementById('login-error-alert');
-            if(errAlert) errAlert.classList.add('hidden');
-            document.getElementById('modal-login').classList.remove('hidden');
-        }
-
-        function closeLoginModal() {
-            document.getElementById('modal-login').classList.add('hidden');
-        }
-
-        function showLoginError(msg) {
-            const errAlert = document.getElementById('login-error-alert');
-            const errText = document.getElementById('login-error-msg');
-            if(errAlert && errText) {
-                errText.innerText = msg;
-                errAlert.classList.remove('hidden');
-            }
-        }
-
-        async function handleLogin(e) {
-            if(e && e.preventDefault) e.preventDefault();
-            
-            const errAlert = document.getElementById('login-error-alert');
-            if(errAlert) errAlert.classList.add('hidden');
-
-            const emailInput = document.getElementById('login-email');
-            const passwordInput = document.getElementById('login-password');
-            const email = emailInput ? emailInput.value.trim() : '';
-            const password = passwordInput ? passwordInput.value.trim() : '';
-
-            if(!email || !password) {
-                showLoginError("Please enter both email address and password.");
-                return false;
-            }
-
-            const btn = document.getElementById('btn-login-submit');
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Authenticating...`;
-            btn.disabled = true;
-
-            try {
-                if(state.client) {
-                    // 1. Supabase Auth Login Request
-                    const { data, error } = await state.client.auth.signInWithPassword({ email, password });
-                    if(error) {
-                        if(error.message.includes("Invalid login credentials")) {
-                            throw new Error("Invalid email address or password. Please verify your credentials.");
-                        }
-                        throw error;
-                    }
-
-                    // 2. Authorization Check against admin_users table
-                    const { data: adminRows, error: adminErr } = await state.client
-                        .from('admin_users')
-                        .select('email')
-                        .eq('email', email);
-
-                    if(adminErr) {
-                        console.warn("admin_users check error:", adminErr);
-                    }
-
-                    if(adminRows && adminRows.length === 0) {
-                        // User exists in auth but not in admin_users allowlist
-                        await state.client.auth.signOut();
-                        throw new Error(`Unauthorized Admin Access: ${email} is not listed in the SBIMS admin_users allowlist.`);
-                    }
-
-                    state.currentUser = data.user;
-                } else {
-                    // Demo Mode Fallback (When live keys are not supplied)
-                    state.currentUser = { email: email };
-                    showToast('Logged in via Demo / Offline Mode', 'info');
-                }
-
-                updateAuthUI();
-                closeLoginModal();
-                showToast(`Welcome back, Admin (${state.currentUser.email})`, 'success');
-                addActivityLog('Admin Login', '-', `Logged in as ${state.currentUser.email}`);
-                
-                // Automatically transition to Create Certificate tab upon successful login
-                switchTab('create');
-
-            } catch(err) {
-                console.error("Login attempt failed:", err);
-                showLoginError(err.message || "Authentication failed. Check network or credentials.");
-            } finally {
-                btn.innerHTML = `<i class="fa-solid fa-key mr-2"></i> Authenticate & Login`;
-                btn.disabled = false;
-            }
-
-            return false;
-        }
-
-        async function handleLogout() {
-            if(state.client) {
-                try {
-                    await state.client.auth.signOut();
-                } catch(e) {
-                    console.warn("Logout error:", e);
-                }
-            }
-            state.currentUser = null;
-            updateAuthUI();
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('auth-container-unauth').classList.remove('hidden');
+            document.getElementById('auth-container-auth').classList.add('hidden');
+            document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
             switchTab('verify');
-            showToast('Logged out of administrative portal', 'info');
         }
 
-        function updateAuthUI() {
-            const isAuth = !!state.currentUser;
-            document.getElementById('auth-container-unauth').classList.toggle('hidden', isAuth);
-            document.getElementById('auth-container-auth').classList.toggle('hidden', !isAuth);
-
-            if(isAuth && state.currentUser) {
-                document.getElementById('admin-user-email').innerText = state.currentUser.email;
-            }
-
-            // Show/Hide Admin Navigation Links & Buttons
-            document.querySelectorAll('.admin-only').forEach(el => {
-                el.classList.toggle('hidden', !isAuth);
-            });
-        }
-
-        // PUBLIC VERIFICATION LOOKUP
-        async function handlePublicVerify(e) {
+        function handlePublicVerify(e) {
             e.preventDefault();
             const certNum = document.getElementById('verify-cert-num').value.trim().toUpperCase();
-            if(!certNum) return;
-
-            executeVerificationSearch(certNum);
-        }
-
-        async function executeVerificationSearch(certNum) {
-            const btn = document.getElementById('btn-search-verify');
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Verifying...`;
-            btn.disabled = true;
-
-            let record = null;
-
-            try {
-                if(state.client) {
-                    // Call Supabase RPC Function verify_certificate_public
-                    const { data, error } = await state.client.rpc('verify_certificate_public', { cert_num: certNum });
-                    if(error) throw error;
-                    if(data && data.length > 0) record = data[0];
-                } else {
-                    // Search in Mock Array
-                    record = state.mockCertificates.find(c => c.certificate_id.toUpperCase() === certNum);
-                }
-
-                if(!record) {
-                    document.getElementById('verification-result-area').classList.add('hidden');
-                    showToast(`No record found matching Certificate Number: ${certNum}`, 'error');
-                } else {
-                    displayVerificationRecord(record);
-                    showToast(`Certificate ${certNum} verified successfully!`, 'success');
-                }
-            } catch(err) {
-                showToast(err.message || 'Error conducting certificate lookup', 'error');
-            } finally {
-                btn.innerHTML = `<span>Verify Now</span>`;
-                btn.disabled = false;
-            }
-        }
-
-        // DISPLAY VERIFICATION CERTIFICATE CARD
-        function displayVerificationRecord(cert) {
-            const resultArea = document.getElementById('verification-result-area');
-            const actionsToolbar = document.getElementById('cert-actions-toolbar');
-            const revokedBanner = document.getElementById('revoked-banner');
-            const statusBadge = document.getElementById('badge-cert-status');
-            const certWatermark = document.getElementById('cert-watermark');
-
-            // Populate Certificate Card Text Fields
-            document.getElementById('cert-display-id').innerText = cert.certificate_id;
-            document.getElementById('cert-display-date').innerText = formatDateDisplay(cert.issue_date);
-            document.getElementById('cert-display-type').innerText = cert.certificate_type;
-            document.getElementById('cert-display-name').innerText = cert.recipient_name;
-            document.getElementById('cert-display-desig-dept').innerText = `${cert.designation} • ${cert.department}`;
-            document.getElementById('cert-display-authority').innerText = cert.approving_authority;
-            document.getElementById('cert-display-note').innerText = cert.recognition_note || 'Issued in official recognition of services rendered at Shri Balaji Institute of Medical Sciences.';
-
-            // Generate QR Code targeting public verification URL
-            const qrBox = document.getElementById('cert-qrcode-box');
-            qrBox.innerHTML = '';
-            const verifyUrl = `${window.location.origin}${window.location.pathname}?cert=${cert.certificate_id}`;
-            new QRCode(qrBox, {
-                text: verifyUrl,
-                width: 70,
-                height: 70,
-                colorDark : "#0c2340",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-            });
-
-            // Handle Status logic (VALID vs CANCELLED)
-            const isValid = cert.status === 'VALID';
-
-            if(isValid) {
-                statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center";
-                statusBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5"></i> Officially Verified`;
-                
-                revokedBanner.classList.add('hidden');
-                actionsToolbar.classList.remove('hidden');
-                
-                certWatermark.innerText = 'SBIMS OFFICIAL';
-                certWatermark.classList.remove('watermark-revoked');
-            } else {
-                statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-300 flex items-center";
-                statusBadge.innerHTML = `<i class="fa-solid fa-ban mr-1.5"></i> REVOKED / CANCELLED`;
-                
-                revokedBanner.classList.remove('hidden');
-                actionsToolbar.classList.add('hidden'); // Hide PDF Download and Print buttons for revoked certs
-                
-                document.getElementById('revoked-reason-text').innerText = `Revocation Reason: ${cert.cancellation_reason || 'Administrative cancellation'}`;
-                
-                certWatermark.innerText = 'REVOKED / CANCELLED';
-                certWatermark.classList.add('watermark-revoked');
-            }
-
-            resultArea.classList.remove('hidden');
-        }
-
-        // HIGH-PRECISION PDF DOWNLOAD FUNCTIONALITY (html2pdf.js)
-        async function downloadCertificatePDF() {
-            const certId = document.getElementById('cert-display-id').innerText;
-            const element = document.getElementById('certificate-container');
-            const overlay = document.getElementById('pdf-loading-overlay');
-
-            overlay.classList.remove('hidden');
-
-            // html2pdf Configuration for standard A4 landscape
-            const opt = {
-                margin:       0,
-                filename:     `SBIMS_Certificate_${certId}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-            };
-
-            try {
-                await html2pdf().set(opt).from(element).save();
-                showToast(`PDF SBIMS_Certificate_${certId}.pdf downloaded successfully!`, 'success');
-            } catch(err) {
-                console.error('PDF Generation Error:', err);
-                showToast('Failed to generate PDF file. Try using Print -> Save as PDF.', 'error');
-            } finally {
-                overlay.classList.add('hidden');
-            }
-        }
-
-        // PRINT FUNCTIONALITY
-        function printCertificate() {
-            window.print();
-        }
-
-        // CREATE CERTIFICATE FORM HANDLERS
-        function toggleCustomDesignation() {
-            const select = document.getElementById('form-designation');
-            const customBox = document.getElementById('custom-designation-container');
-            if(select.value === 'OTHER') {
-                customBox.classList.remove('hidden');
-            } else {
-                customBox.classList.add('hidden');
-            }
-        }
-
-        function previewFormCertificate() {
-            const name = document.getElementById('form-recipient-name').value || 'RECIPIENT FULL NAME';
-            let desig = document.getElementById('form-designation').value;
-            if(desig === 'OTHER') desig = document.getElementById('form-custom-designation').value || 'Special Consultant';
             
-            const dept = document.getElementById('form-department').value || 'Department Name';
-            const type = document.getElementById('form-cert-type').value;
-            const date = document.getElementById('form-issue-date').value || new Date().toISOString().split('T')[0];
-            const authority = document.getElementById('form-authority').value || 'Medical Superintendent';
-            const note = document.getElementById('form-recognition-note').value || 'In recognition of outstanding performance and meritorious contribution.';
-
-            const previewObj = {
-                certificate_id: 'PREVIEW-TEMP-000',
-                recipient_name: name,
-                designation: desig,
-                department: dept,
-                certificate_type: type,
-                issue_date: date,
-                approving_authority: authority,
-                recognition_note: note,
+            // Sample data rendering matching simplified layout
+            activeVerifiedRecord = {
+                certificate_id: certNum || 'SBIMS202600001',
+                verification_code: 'SBIMS-VER-' + Math.floor(1000 + Math.random() * 9000),
+                recipient_name: 'DR. AARAV SHARMA',
+                designation: 'Senior Resident',
+                department: 'Department of Cardiology',
+                certificate_type: 'Certificate of Clinical Excellence',
+                issue_date: '2026-01-01',
+                approving_authority: 'Dr. HOD Cardiology',
+                recognition_note: 'In recognition of clinical excellence and dedicated medical service.',
                 status: 'VALID'
             };
 
-            switchTab('verify');
-            displayVerificationRecord(previewObj);
-            showToast('Previewing generated certificate. Click "Create Certificate" tab to save permanently.', 'info');
+            renderCertificate(activeVerifiedRecord);
+            document.getElementById('verification-result-area').classList.remove('hidden');
         }
 
-        async function handleCreateCertificate(e) {
-            e.preventDefault();
-            if(!state.currentUser) {
-                showToast('Admin login required to issue certificates', 'error');
-                return;
-            }
+        function renderCertificate(rec) {
+            document.getElementById('cert-display-id').textContent = rec.certificate_id;
+            document.getElementById('cert-display-code').textContent = rec.verification_code || 'SBIMS-VER-2026';
+            document.getElementById('cert-display-name').textContent = rec.recipient_name;
+            document.getElementById('cert-display-desig-dept').textContent = `${rec.designation} • ${rec.department}`;
+            document.getElementById('cert-display-type').textContent = rec.certificate_type;
+            document.getElementById('cert-display-date').textContent = rec.issue_date;
+            document.getElementById('cert-display-authority').textContent = rec.approving_authority;
+            document.getElementById('cert-display-note').textContent = rec.recognition_note;
 
-            const name = document.getElementById('form-recipient-name').value.trim();
-            let desig = document.getElementById('form-designation').value;
-            if(desig === 'OTHER') desig = document.getElementById('form-custom-designation').value.trim();
-            
-            const dept = document.getElementById('form-department').value.trim();
-            const type = document.getElementById('form-cert-type').value;
-            const date = document.getElementById('form-issue-date').value;
-            const authority = document.getElementById('form-authority').value.trim();
-            const note = document.getElementById('form-recognition-note').value.trim();
-
-            const btn = document.getElementById('btn-save-cert');
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Saving...`;
-            btn.disabled = true;
-
-            try {
-                let savedRecord = null;
-
-                if(state.client) {
-                    const payload = {
-                        recipient_name: name,
-                        designation: desig,
-                        department: dept,
-                        certificate_type: type,
-                        issue_date: date,
-                        approving_authority: authority,
-                        recognition_note: note,
-                        created_by: state.currentUser.email
-                    };
-
-                    const { data, error } = await state.client.from('certificates').insert([payload]).select();
-                    if(error) throw error;
-                    savedRecord = data[0];
-                } else {
-                    // Demo local auto-number generator
-                    const seq = state.mockCertificates.length + 1;
-                    const autoId = `SBIMS${new Date().getFullYear()}${String(seq).padStart(5, '0')}`;
-                    
-                    savedRecord = {
-                        certificate_id: autoId,
-                        recipient_name: name,
-                        designation: desig,
-                        department: dept,
-                        certificate_type: type,
-                        issue_date: date,
-                        approving_authority: authority,
-                        recognition_note: note,
-                        status: 'VALID',
-                        created_at: new Date().toISOString()
-                    };
-
-                    state.mockCertificates.unshift(savedRecord);
-                }
-
-                addActivityLog('Create Certificate', savedRecord.certificate_id, `Issued to ${name}`);
-                showToast(`Certificate ${savedRecord.certificate_id} created successfully!`, 'success');
-                
-                // Switch to verification view to show new cert
-                switchTab('verify');
-                displayVerificationRecord(savedRecord);
-
-                // Reset Form
-                document.getElementById('form-recipient-name').value = '';
-                document.getElementById('form-recognition-note').value = '';
-            } catch(err) {
-                showToast(err.message || 'Error creating certificate record', 'error');
-            } finally {
-                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Save & Issue Certificate`;
-                btn.disabled = false;
-            }
-        }
-
-        // ADMIN REGISTER TABLE LOGIC
-        async function loadRegisterTable() {
-            const tbody = document.getElementById('register-tbody');
-            tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400"><i class="fa-solid fa-spinner animate-spin mr-2"></i> Loading register dataset...</td></tr>`;
-
-            let certs = [];
-
-            try {
-                if(state.client) {
-                    const { data, error } = await state.client.from('certificates').select('*').order('created_at', { ascending: false });
-                    if(error) throw error;
-                    certs = data || [];
-                } else {
-                    certs = state.mockCertificates;
-                }
-
-                renderRegisterRows(certs);
-            } catch(err) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-500">Error loading database register: ${err.message}</td></tr>`;
-            }
-        }
-
-        function renderRegisterRows(certs) {
-            const tbody = document.getElementById('register-tbody');
-            tbody.innerHTML = '';
-
-            if(certs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">No certificate records found in database.</td></tr>`;
-                return;
-            }
-
-            certs.forEach(c => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50 transition border-b border-slate-200";
-
-                const isValid = c.status === 'VALID';
-
-                tr.innerHTML = `
-                    <td class="p-3 font-mono font-bold text-navy-900">${c.certificate_id}</td>
-                    <td class="p-3 font-semibold">${c.recipient_name}</td>
-                    <td class="p-3 text-slate-500">${c.designation}<br><span class="text-[10px] text-slate-400">${c.department}</span></td>
-                    <td class="p-3 text-slate-600">${c.certificate_type}</td>
-                    <td class="p-3 text-slate-500">${formatDateDisplay(c.issue_date)}</td>
-                    <td class="p-3">
-                        ${isValid 
-                            ? `<span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-300">VALID</span>`
-                            : `<span class="bg-red-100 text-red-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-red-300">REVOKED</span>`}
-                    </td>
-                    <td class="p-3 text-right space-x-2">
-                        <button onclick="viewCertificateFromRegister('${c.certificate_id}')" title="View Certificate" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded border"><i class="fa-solid fa-eye"></i></button>
-                        ${isValid ? `<button onclick="openCancelModal('${c.certificate_id}')" title="Revoke Certificate" class="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded border border-red-300"><i class="fa-solid fa-ban"></i></button>` : ''}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function filterRegisterTable() {
-            const query = document.getElementById('register-search').value.toLowerCase();
-            const statusFilter = document.getElementById('register-filter-status').value;
-
-            let source = state.mockCertificates;
-            // Filter
-            const filtered = source.filter(c => {
-                const matchesText = c.certificate_id.toLowerCase().includes(query) || c.recipient_name.toLowerCase().includes(query);
-                const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
-                return matchesText && matchesStatus;
-            });
-
-            renderRegisterRows(filtered);
-        }
-
-        function viewCertificateFromRegister(certId) {
-            switchTab('verify');
-            document.getElementById('verify-cert-num').value = certId;
-            executeVerificationSearch(certId);
-        }
-
-        // REVOCATION / CANCELLATION MODAL
-        function openCancelModal(certId) {
-            state.targetRevokeId = certId;
-            document.getElementById('cancel-modal-cert-id').innerText = certId;
-            document.getElementById('cancel-reason-input').value = '';
-            document.getElementById('modal-cancel').classList.remove('hidden');
-        }
-
-        function closeCancelModal() {
-            document.getElementById('modal-cancel').classList.add('hidden');
-            state.targetRevokeId = null;
-        }
-
-        async function confirmRevokeCertificate() {
-            const certId = state.targetRevokeId;
-            const reason = document.getElementById('cancel-reason-input').value.trim();
-
-            if(!reason) {
-                showToast('Revocation reason is compulsory', 'error');
-                return;
-            }
-
-            try {
-                if(state.client) {
-                    const { error } = await state.client.from('certificates').update({
-                        status: 'CANCELLED',
-                        cancelled_at: new Date().toISOString(),
-                        cancelled_by: state.currentUser ? state.currentUser.email : 'admin',
-                        cancellation_reason: reason
-                    }).eq('certificate_id', certId);
-
-                    if(error) throw error;
-                } else {
-                    const target = state.mockCertificates.find(c => c.certificate_id === certId);
-                    if(target) {
-                        target.status = 'CANCELLED';
-                        target.cancelled_at = new Date().toISOString();
-                        target.cancellation_reason = reason;
-                    }
-                }
-
-                addActivityLog('Revoke Certificate', certId, `Reason: ${reason}`);
-                showToast(`Certificate ${certId} revoked successfully`, 'success');
-                closeCancelModal();
-                loadRegisterTable();
-            } catch(err) {
-                showToast(err.message || 'Error revoking certificate', 'error');
-            }
-        }
-
-        // ACTIVITY LOGS SYSTEM
-        function addActivityLog(action, certId, details) {
-            const log = {
-                timestamp: new Date().toISOString(),
-                admin_email: state.currentUser ? state.currentUser.email : 'system',
-                action: action,
-                certificate_id: certId,
-                details: details
-            };
-
-            state.mockLogs.unshift(log);
-
-            if(state.client) {
-                state.client.from('activity_logs').insert([{
-                    admin_email: log.admin_email,
-                    action: log.action,
-                    certificate_id: log.certificate_id,
-                    details: log.details
-                }]).then();
-            }
-        }
-
-        async function loadActivityLogs() {
-            const tbody = document.getElementById('logs-tbody');
-            tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Loading activity logs...</td></tr>`;
-
-            let logs = [];
-
-            try {
-                if(state.client) {
-                    const { data, error } = await state.client.from('activity_logs').select('*').order('created_at', { ascending: false });
-                    if(error) throw error;
-                    logs = data || [];
-                } else {
-                    logs = state.mockLogs;
-                }
-
-                tbody.innerHTML = '';
-                logs.forEach(l => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 border-b border-slate-200";
-                    tr.innerHTML = `
-                        <td class="p-3 text-slate-400">${new Date(l.timestamp || l.created_at).toLocaleString()}</td>
-                        <td class="p-3 font-semibold text-navy-900">${l.admin_email}</td>
-                        <td class="p-3 font-bold text-gold-600">${l.action}</td>
-                        <td class="p-3 font-mono">${l.certificate_id || '-'}</td>
-                        <td class="p-3 text-slate-600">${l.details || '-'}</td>
-                    `;
-                    tbody.appendChild(tr);
+            const qrBox = document.getElementById('cert-qrcode-box');
+            qrBox.innerHTML = '';
+            if(window.QRCode) {
+                new QRCode(qrBox, {
+                    text: `https://sbims.edu.in/verify?id=${rec.certificate_id}`,
+                    width: 65, height: 65
                 });
-            } catch(err) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">Error loading logs: ${err.message}</td></tr>`;
             }
         }
 
-        // UTILITY FUNCTIONS
-        function formatDateDisplay(dateStr) {
-            if(!dateStr) return '-';
-            const d = new Date(dateStr);
-            if(isNaN(d.getTime())) return dateStr;
-            return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        function downloadCertificatePDF() {
+            const element = document.getElementById('certificate-container');
+            html2pdf().from(element).set({
+                margin: 0,
+                filename: `SBIMS_Certificate_${activeVerifiedRecord.certificate_id}.pdf`,
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            }).save();
         }
 
-        function copySQLScript() {
-            const code = document.getElementById('sql-code-block').innerText;
-            const temp = document.createElement('textarea');
-            temp.value = code;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-            showToast('SQL Migration Script copied to clipboard!', 'success');
-        }
+        function printCertificate() { window.print(); }
     </script>
 </body>
 </html>
-```
