@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -742,7 +743,7 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
     <div id="modal-login" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
             <div class="bg-navy-900 p-6 text-white text-center relative border-b-2 border-gold-500">
-                <button onclick="closeLoginModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
+                <button type="button" onclick="closeLoginModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
                 <div class="w-12 h-12 bg-white rounded-full mx-auto p-1 border-2 border-gold-500 mb-2 flex items-center justify-center">
@@ -752,7 +753,13 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
                 <p class="text-xs text-gold-400 mt-1">Access Certificate Issuer & Register Controls</p>
             </div>
 
-            <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
+            <form id="admin-login-form" onsubmit="handleLogin(event)" class="p-6 space-y-4">
+                <!-- INLINE ERROR ALERT BOX -->
+                <div id="login-error-alert" class="hidden p-3 rounded-lg bg-red-50 border border-red-300 text-red-800 text-xs font-semibold flex items-start space-x-2">
+                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-sm mt-0.5 flex-shrink-0"></i>
+                    <span id="login-error-msg"></span>
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Admin Email Address</label>
                     <input type="email" id="login-email" required placeholder="admin@sbims.edu.in" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 text-sm font-semibold focus:ring-2 focus:ring-gold-500 focus:outline-none">
@@ -767,7 +774,7 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
                         <i class="fa-solid fa-key mr-2"></i> Authenticate & Login
                     </button>
                 </div>
-                <p class="text-[11px] text-slate-500 text-center">Note: Uses Supabase Auth allowlist. In local demo mode, any admin email logins automatically.</p>
+                <p class="text-[11px] text-slate-500 text-center">In live mode, credentials are checked against Supabase Auth & <code>admin_users</code> table. In demo mode without keys, any email/password logs in seamlessly.</p>
             </form>
         </div>
     </div>
@@ -892,6 +899,7 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
         window.onload = function() {
             initSupabaseClient();
             applyLogoConfiguration();
+            checkExistingSession();
             updateAuthUI();
             
             // Set default date for create form
@@ -902,7 +910,7 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
             // Load initial mock verify sample
             displayVerificationRecord(state.mockCertificates[0]);
 
-            // Check URL query parameters for direct verification link (e.g., ?cert=SBIMS202600001)
+            // Check URL query parameters for direct verification link
             const urlParams = new URLSearchParams(window.location.search);
             const queryCert = urlParams.get('cert');
             if(queryCert) {
@@ -916,119 +924,31 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
             if(state.supabaseUrl && state.supabaseKey && window.supabase) {
                 try {
                     state.client = window.supabase.createClient(state.supabaseUrl, state.supabaseKey);
-                    console.log('Supabase client connected successfully.');
+                    console.log('Supabase client initialized successfully.');
                 } catch(e) {
                     console.warn('Failed to initialize Supabase client:', e);
                 }
             }
         }
 
-        // TAB SWITCHING SYSTEM
-        function switchTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // Unhighlight all nav buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('text-gold-400', 'bg-navy-800', 'border', 'border-gold-500/30');
-                btn.classList.add('text-slate-300');
-            });
-
-            // Show selected tab
-            const targetTab = document.getElementById(`tab-${tabName}`);
-            if(targetTab) targetTab.classList.remove('hidden');
-
-            // Highlight corresponding nav button
-            const targetNav = document.getElementById(`nav-${tabName}`);
-            if(targetNav) {
-                targetNav.classList.add('text-gold-400', 'bg-navy-800', 'border', 'border-gold-500/30');
-                targetNav.classList.remove('text-slate-300');
+        async function checkExistingSession() {
+            if(state.client) {
+                try {
+                    const { data: { session } } = await state.client.auth.getSession();
+                    if(session && session.user) {
+                        state.currentUser = session.user;
+                        updateAuthUI();
+                    }
+                } catch(e) {
+                    console.warn("Session check error:", e);
+                }
             }
-
-            // Load specific tab datasets
-            if(tabName === 'register') loadRegisterTable();
-            if(tabName === 'logs') loadActivityLogs();
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        // NOTIFICATION TOAST SYSTEM
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            
-            let bgClass = 'bg-navy-900 border-gold-500 text-white';
-            let icon = 'fa-circle-info text-gold-400';
-
-            if(type === 'success') {
-                bgClass = 'bg-emerald-900 border-emerald-500 text-white';
-                icon = 'fa-circle-check text-emerald-400';
-            } else if(type === 'error') {
-                bgClass = 'bg-red-900 border-red-500 text-white';
-                icon = 'fa-circle-xmark text-red-400';
-            }
-
-            toast.className = `pointer-events-auto p-4 rounded-xl shadow-2xl border flex items-center justify-between space-x-3 transition-all duration-300 ${bgClass}`;
-            toast.innerHTML = `
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid ${icon} text-lg"></i>
-                    <p class="text-xs font-semibold">${message}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            `;
-
-            container.appendChild(toast);
-            setTimeout(() => {
-                if(toast.parentElement) toast.remove();
-            }, 4000);
-        }
-
-        // LOGO CONFIGURATION
-        function applyLogoConfiguration() {
-            const headerLogo = document.getElementById('header-logo');
-            const certLogo = document.getElementById('cert-logo');
-            if(headerLogo) headerLogo.src = state.logoUrl;
-            if(certLogo) certLogo.src = state.logoUrl;
-        }
-
-        function openConfigModal() {
-            document.getElementById('config-logo-url').value = state.logoUrl;
-            document.getElementById('config-supabase-url').value = state.supabaseUrl;
-            document.getElementById('config-supabase-key').value = state.supabaseKey;
-            document.getElementById('modal-config').classList.remove('hidden');
-        }
-
-        function closeConfigModal() {
-            document.getElementById('modal-config').classList.add('hidden');
-        }
-
-        function saveConfiguration() {
-            const logo = document.getElementById('config-logo-url').value.trim();
-            const url = document.getElementById('config-supabase-url').value.trim();
-            const key = document.getElementById('config-supabase-key').value.trim();
-
-            if(logo) {
-                state.logoUrl = logo;
-                localStorage.setItem('SBIMS_LOGO_URL', logo);
-            }
-            if(url && key) {
-                state.supabaseUrl = url;
-                state.supabaseKey = key;
-                localStorage.setItem('SBIMS_SUPABASE_URL', url);
-                localStorage.setItem('SBIMS_SUPABASE_KEY', key);
-                initSupabaseClient();
-            }
-
-            applyLogoConfiguration();
-            closeConfigModal();
-            showToast('Settings & Credentials updated successfully!', 'success');
         }
 
         // AUTHENTICATION LOGIC
         function openLoginModal() {
+            const errAlert = document.getElementById('login-error-alert');
+            if(errAlert) errAlert.classList.add('hidden');
             document.getElementById('modal-login').classList.remove('hidden');
         }
 
@@ -1036,10 +956,30 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
             document.getElementById('modal-login').classList.add('hidden');
         }
 
+        function showLoginError(msg) {
+            const errAlert = document.getElementById('login-error-alert');
+            const errText = document.getElementById('login-error-msg');
+            if(errAlert && errText) {
+                errText.innerText = msg;
+                errAlert.classList.remove('hidden');
+            }
+        }
+
         async function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value.trim();
+            if(e && e.preventDefault) e.preventDefault();
+            
+            const errAlert = document.getElementById('login-error-alert');
+            if(errAlert) errAlert.classList.add('hidden');
+
+            const emailInput = document.getElementById('login-email');
+            const passwordInput = document.getElementById('login-password');
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value.trim() : '';
+
+            if(!email || !password) {
+                showLoginError("Please enter both email address and password.");
+                return false;
+            }
 
             const btn = document.getElementById('btn-login-submit');
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin mr-2"></i> Authenticating...`;
@@ -1047,28 +987,65 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
 
             try {
                 if(state.client) {
+                    // 1. Supabase Auth Login Request
                     const { data, error } = await state.client.auth.signInWithPassword({ email, password });
-                    if(error) throw error;
+                    if(error) {
+                        if(error.message.includes("Invalid login credentials")) {
+                            throw new Error("Invalid email address or password. Please verify your credentials.");
+                        }
+                        throw error;
+                    }
+
+                    // 2. Authorization Check against admin_users table
+                    const { data: adminRows, error: adminErr } = await state.client
+                        .from('admin_users')
+                        .select('email')
+                        .eq('email', email);
+
+                    if(adminErr) {
+                        console.warn("admin_users check error:", adminErr);
+                    }
+
+                    if(adminRows && adminRows.length === 0) {
+                        // User exists in auth but not in admin_users allowlist
+                        await state.client.auth.signOut();
+                        throw new Error(`Unauthorized Admin Access: ${email} is not listed in the SBIMS admin_users allowlist.`);
+                    }
+
                     state.currentUser = data.user;
                 } else {
-                    // Demo mode login
-                    state.currentUser = { email: email || 'admin@sbims.edu.in' };
+                    // Demo Mode Fallback (When live keys are not supplied)
+                    state.currentUser = { email: email };
+                    showToast('Logged in via Demo / Offline Mode', 'info');
                 }
 
                 updateAuthUI();
                 closeLoginModal();
                 showToast(`Welcome back, Admin (${state.currentUser.email})`, 'success');
                 addActivityLog('Admin Login', '-', `Logged in as ${state.currentUser.email}`);
+                
+                // Automatically transition to Create Certificate tab upon successful login
+                switchTab('create');
+
             } catch(err) {
-                showToast(err.message || 'Authentication failed', 'error');
+                console.error("Login attempt failed:", err);
+                showLoginError(err.message || "Authentication failed. Check network or credentials.");
             } finally {
                 btn.innerHTML = `<i class="fa-solid fa-key mr-2"></i> Authenticate & Login`;
                 btn.disabled = false;
             }
+
+            return false;
         }
 
-        function handleLogout() {
-            if(state.client) state.client.auth.signOut();
+        async function handleLogout() {
+            if(state.client) {
+                try {
+                    await state.client.auth.signOut();
+                } catch(e) {
+                    console.warn("Logout error:", e);
+                }
+            }
             state.currentUser = null;
             updateAuthUI();
             switchTab('verify');
@@ -1084,7 +1061,7 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
                 document.getElementById('admin-user-email').innerText = state.currentUser.email;
             }
 
-            // Show/Hide Admin Navigation Links
+            // Show/Hide Admin Navigation Links & Buttons
             document.querySelectorAll('.admin-only').forEach(el => {
                 el.classList.toggle('hidden', !isAuth);
             });
@@ -1543,4 +1520,5 @@ CREATE POLICY "Admin Full Access Logs" ON public.activity_logs
         }
     </script>
 </body>
-                          </html>
+</html>
+```
