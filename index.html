@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,583 +5,300 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#123b55">
 <title>SBIMS Certificate Verification Portal</title>
-
 <style>
-:root {
-  --navy:#123b55;
-  --gold:#c29a4a;
-  --ink:#18374b;
-  --muted:#687b91;
-  --line:#d8e3ea;
-}
-* {box-sizing:border-box}
-body {
-  margin:0;
-  background:#edf3f6;
-  font-family:Arial,sans-serif;
-  color:var(--ink);
-}
-header {
-  background:linear-gradient(115deg,#0d3048,#1e5870);
-  color:white;
-  padding:22px 18px;
-  border-bottom:4px solid var(--gold);
-}
-.brand {
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-.seal {
-  width:60px;height:60px;
-  border:2px solid #e4c778;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  color:#f3d58a;
-  font-weight:bold;
-  text-align:center;
-  flex-shrink:0;
-}
-h1 {font-size:19px;margin:0}
-header p {font-size:13px;color:#d9e8f1;margin:6px 0}
-main {
-  max-width:950px;
-  margin:25px auto;
-  padding:0 14px 30px;
-}
-.notice {
-  background:#fff8e5;
-  border:1px solid #e6cf91;
-  padding:14px;
-  border-radius:10px;
-  margin-bottom:15px;
-  font-size:13px;
-  line-height:1.6;
-}
-.tabs {
-  display:flex;
-  gap:8px;
-  background:#e0e9ef;
-  padding:7px;
-  border-radius:12px;
-  margin-bottom:15px;
-}
-button {
-  cursor:pointer;
-  border:0;
-  border-radius:8px;
-  padding:12px 16px;
-  font-weight:bold;
-  background:var(--navy);
-  color:white;
-}
-.tab {
-  flex:1;
-  background:transparent;
-  color:var(--navy);
-}
-.tab.active {background:white}
-.card {
-  background:white;
-  border:1px solid var(--line);
-  border-radius:15px;
-  padding:20px;
-  box-shadow:0 5px 20px #1634530c;
-}
-.hidden {display:none!important}
-.title {
-  font:25px Georgia,serif;
-  margin:0 0 8px;
-  color:#163f58;
-}
-.sub {
-  color:var(--muted);
-  font-size:13px;
-  margin-bottom:20px;
-}
-.grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
-.full {grid-column:1/-1}
-label {
-  display:block;
-  font-size:13px;
-  font-weight:bold;
-  margin-bottom:6px;
-}
-input,select,textarea {
-  width:100%;
-  border:1px solid #c7d6e0;
-  border-radius:8px;
-  padding:12px;
-  font-size:14px;
-  background:white;
-  color:#173052;
-}
-textarea {min-height:80px}
-.actions {
-  display:flex;
-  gap:9px;
-  flex-wrap:wrap;
-  margin-top:17px;
-}
-.secondary {background:#e9e2d2;color:#443416}
-.result {
-  margin-top:14px;
-  padding:13px;
-  border-radius:9px;
-  background:#eef3f7;
-  font-size:13px;
-  line-height:1.5;
-  overflow-wrap:anywhere;
-}
-.good {background:#e8f6ec;color:#216438}
-.bad {background:#fff0ee;color:#9c3028}
-.muted {font-size:12px;color:var(--muted);line-height:1.5}
-.stats {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  margin-bottom:20px;
-}
-.stat {
-  background:#f1f6f8;
-  border:1px solid var(--line);
-  border-radius:9px;
-  padding:13px;
-}
-.stat b {display:block;font-size:14px}
-.stat span {font-size:11px;color:var(--muted)}
-.table-wrap {overflow-x:auto;margin-top:12px}
-table {width:100%;border-collapse:collapse;min-width:600px;font-size:12px}
-th,td {padding:10px;border-bottom:1px solid #e2eaf0;text-align:left}
-th {background:#f2f6f8}
-footer {text-align:center;padding:20px;font-size:11px;color:#748398}
-@media(max-width:600px) {
-  .grid {grid-template-columns:1fr}
-  .full {grid-column:auto}
-  .stats {grid-template-columns:1fr 1fr}
-  h1 {font-size:16px}
-}
+:root{--navy:#123b55;--gold:#c29a4a;--ink:#18374b;--muted:#687b91;--line:#d8e3ea}
+*{box-sizing:border-box}body{margin:0;background:#edf3f6;font-family:Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(115deg,#0d3048,#1e5870);color:white;padding:22px 18px;border-bottom:4px solid var(--gold)}
+.brand{display:flex;align-items:center;gap:14px}.seal{width:60px;height:60px;border:2px solid #e4c778;border-radius:50%;display:grid;place-items:center;color:#f3d58a;font-weight:bold;text-align:center;flex-shrink:0}
+h1{font-size:19px;margin:0}header p{font-size:13px;color:#d9e8f1;margin:6px 0}
+main{max-width:950px;margin:25px auto;padding:0 14px 30px}.notice{background:#fff8e5;border:1px solid #e6cf91;padding:14px;border-radius:10px;margin-bottom:15px;font-size:13px;line-height:1.6}
+.tabs{display:flex;gap:8px;background:#e0e9ef;padding:7px;border-radius:12px;margin-bottom:15px}
+button{cursor:pointer;border:0;border-radius:8px;padding:12px 16px;font-weight:bold;background:var(--navy);color:white}
+button:disabled{opacity:.55;cursor:wait}.tab{flex:1;background:transparent;color:var(--navy)}.tab.active{background:white}
+.card{background:white;border:1px solid var(--line);border-radius:15px;padding:20px;box-shadow:0 5px 20px #1634530c}.hidden{display:none!important}
+.title{font:25px Georgia,serif;margin:0 0 8px;color:#163f58}.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}
+label{display:block;font-size:13px;font-weight:bold;margin-bottom:6px}
+input,select,textarea{width:100%;border:1px solid #c7d6e0;border-radius:8px;padding:12px;font-size:14px;background:white;color:#173052}
+textarea{min-height:80px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:17px}.secondary{background:#e9e2d2;color:#443416}
+.result{margin-top:14px;padding:13px;border-radius:9px;background:#eef3f7;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+.good{background:#e8f6ec;color:#216438}.bad{background:#fff0ee;color:#9c3028}.muted{font-size:12px;color:var(--muted);line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.stat{background:#f1f6f8;border:1px solid var(--line);border-radius:9px;padding:13px}
+.stat b{display:block;font-size:14px}.stat span{font-size:11px;color:var(--muted)}
+.table-wrap{overflow-x:auto;margin-top:12px}table{width:100%;border-collapse:collapse;min-width:650px;font-size:12px}
+th,td{padding:10px;border-bottom:1px solid #e2eaf0;text-align:left}th{background:#f2f6f8}
+.code-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}.code-box{border:1px solid var(--line);border-radius:9px;padding:12px;background:#f7fafb;min-width:0}
+.code-box b{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}.code-box span{font-weight:bold;overflow-wrap:anywhere}
+.gallery{margin-top:26px}.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.gallery-item{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f7fafb}.gallery-item img{width:100%;height:170px;object-fit:cover;display:block}
+.gallery-item p{font-size:12px;padding:8px;margin:0;overflow-wrap:anywhere}
+footer{text-align:center;padding:20px;font-size:11px;color:#748398}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.stats{grid-template-columns:1fr 1fr}h1{font-size:16px}.code-pair{grid-template-columns:1fr 1fr}.gallery-grid{grid-template-columns:1fr 1fr}.gallery-item img{height:130px}}
 </style>
 </head>
-
 <body>
-
-<header>
-  <div class="brand">
-    <div class="seal">SB<br>IMS</div>
-    <div>
-      <h1>SHRI BALAJI INSTITUTE OF MEDICAL SCIENCE</h1>
-      <p>Group of Hospitals & Colleges • Mowa, Raipur (C.G.)</p>
-      <p>Certificate Database & Verification Portal</p>
-    </div>
-  </div>
-</header>
-
+<header><div class="brand"><div class="seal">SB<br>IMS</div><div>
+<h1>SHRI BALAJI INSTITUTE OF MEDICAL SCIENCE</h1>
+<p>Group of Hospitals & Colleges • Mowa, Raipur (C.G.)</p><p>Certificate Database & Verification Portal</p>
+</div></div></header>
 <main>
-
-<div class="notice">
-  <b>SBIMS Certificate Portal</b><br>
-  This portal is intended for authorized certificate management and public certificate verification. Use real institutional records only after formal hospital approval.
-</div>
-
+<div class="notice"><b>SBIMS Certificate Portal</b><br>This portal is intended for authorized certificate management and public certificate verification. Use real institutional records only after formal hospital approval.</div>
 <div class="tabs">
-  <button id="tv" class="tab active" onclick="showTab('verify')">Certificate Verification</button>
-  <button id="ta" class="tab" onclick="showTab('admin')">MRD / Admin Login</button>
+<button id="tv" class="tab active" type="button" onclick="showTab('verify')">Certificate Verification</button>
+<button id="ta" class="tab" type="button" onclick="showTab('admin')">MRD / Admin Login</button>
 </div>
-
 <section id="verify" class="card">
-  <h2 class="title">Verify a Certificate</h2>
-  <p class="sub">Check certificate details against the central database.</p>
-
-  <div class="grid">
-    <div>
-      <label>Certificate ID</label>
-      <input id="vid" placeholder="SBIMS-CERT-20261102-0001">
-    </div>
-    <div>
-      <label>Verification Code</label>
-      <input id="vcode" placeholder="Enter verification code">
-    </div>
-  </div>
-
-  <div class="actions">
-    <button id="verifyBtn" onclick="verifyCertificate()">Verify Certificate</button>
-  </div>
-  <div id="vr" class="result">Enter certificate ID and verification code.</div>
-  <p class="muted">Public verification displays only certificate validity, type and issue date.</p>
+<h2 class="title">Verify a Certificate</h2><p class="sub">Check certificate details against the central database.</p>
+<div class="grid">
+<div><label>Certificate Number</label><input id="vid" placeholder="SBIMS-CERT-20261102-0001"></div>
+<div><label>CODE</label><input id="vcode" placeholder="Enter certificate code"></div>
+</div>
+<div class="actions"><button id="verifyBtn" type="button" onclick="verifyCertificate()">Verify Certificate</button></div>
+<div id="vr" class="result">Enter certificate number and CODE.</div>
+<p class="muted">Public verification displays only certificate validity, type and issue date.</p>
 </section>
 
 <section id="admin" class="card hidden">
-  <h2 class="title">MRD / Admin Workspace</h2>
-  <p class="sub">Authorized Medical Records Department access.</p>
-
-  <div id="loginBox">
-    <div class="grid">
-      <div>
-        <label>Admin Email</label>
-        <input id="email" type="email" placeholder="Admin email">
-      </div>
-      <div>
-        <label>Password</label>
-        <input id="password" type="password" placeholder="Password">
-      </div>
-    </div>
-    <div class="actions">
-      <button id="loginBtn" onclick="signIn()">Sign In</button>
-    </div>
-    <div id="loginMsg" class="result">Sign in with your authorized admin account.</div>
-  </div>
-
-  <div id="workspace" class="hidden">
-    <div class="stats">
-      <div class="stat"><b>Central Register</b><span>Online certificate records</span></div>
-      <div class="stat"><b>Admin Access</b><span>Restricted login</span></div>
-      <div class="stat"><b>Verification</b><span>Database based</span></div>
-    </div>
-
-    <div class="actions">
-      <button class="secondary" onclick="loadRecords()">Refresh Records</button>
-      <button class="secondary" onclick="signOut()">Sign Out</button>
-    </div>
-
-    <hr style="margin:22px 0;border:0;border-top:1px solid #ddd">
-
-    <h2 class="title">Add Certificate Record</h2>
-
-    <div class="grid">
-      <div>
-        <label>Recipient Name</label>
-        <input id="recipient" placeholder="Full name">
-      </div>
-      <div>
-        <label>Designation</label>
-        <input id="designation" placeholder="Designation">
-      </div>
-      <div>
-        <label>Department</label>
-        <input id="department" placeholder="Department">
-      </div>
-      <div>
-        <label>Certificate Type</label>
-        <select id="certType">
-          <option>Certificate of Excellence</option>
-          <option>Certificate of Appreciation</option>
-          <option>Certificate of Achievement</option>
-          <option>Certificate of Participation</option>
-          <option>Certificate of Service</option>
-          <option>Special Recognition</option>
-        </select>
-      </div>
-      <div>
-        <label>Issue Date</label>
-        <input id="issueDate" type="date">
-      </div>
-      <div>
-        <label>Approving Authority</label>
-        <input id="approver" placeholder="Name / Designation">
-      </div>
-      <div class="full">
-        <label>Recognition Note (Optional)</label>
-        <textarea id="message" placeholder="Short note"></textarea>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="saveBtn" onclick="saveCertificate()">Save Certificate</button>
-    </div>
-    <div id="saveMsg" class="result">Ready to save records.</div>
-
-    <hr style="margin:25px 0;border:0;border-top:1px solid #ddd">
-
-    <h2 class="title">Certificate Database</h2>
-    <input id="searchRecords" placeholder="Search records..." oninput="filterRecords()">
-    <p id="recordCount" class="muted">No records loaded.</p>
-    <div id="recordsTable" class="table-wrap"></div>
-  </div>
+<h2 class="title">MRD / Admin Workspace</h2><p class="sub">Authorized Medical Records Department access.</p>
+<div id="loginBox">
+<div class="grid">
+<div><label>Admin Email</label><input id="email" type="email" autocomplete="username" placeholder="Admin email"></div>
+<div><label>Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Password"></div>
+</div>
+<div class="actions"><button id="loginBtn" type="button" onclick="signIn()">Sign In</button></div>
+<div id="loginMsg" class="result">Sign in with your authorized admin account.</div>
+</div>
+<div id="workspace" class="hidden">
+<div class="stats">
+<div class="stat"><b>Central Register</b><span>Online certificate records</span></div>
+<div class="stat"><b>Admin Access</b><span>Restricted login</span></div>
+<div class="stat"><b>Verification</b><span>Database based</span></div>
+</div>
+<div class="actions"><button class="secondary" type="button" onclick="loadRecords()">Refresh Records</button><button class="secondary" type="button" onclick="signOut()">Sign Out</button></div>
+<hr style="margin:22px 0;border:0;border-top:1px solid #ddd">
+<h2 class="title">Add Certificate Record</h2>
+<div class="grid">
+<div><label>Recipient Name</label><input id="recipient" placeholder="Full name"></div>
+<div><label>Designation</label>
+<select id="designation" onchange="toggleCustomDesignation()">
+<option value="">Select designation</option><option>Doctor</option><option>Nursing Officer</option><option>Staff Nurse</option><option>Senior Staff Nurse</option><option>Medical Officer</option><option>Technician</option><option>Pharmacist</option><option>Administrative Staff</option><option>Department In-charge</option><option>Other / Custom</option>
+</select>
+<input id="customDesignation" class="hidden" style="margin-top:8px" placeholder="Enter custom designation">
+</div>
+<div><label>Department</label><input id="department" placeholder="Department"></div>
+<div><label>Certificate Type</label><select id="certType"><option>Certificate of Excellence</option><option>Certificate of Appreciation</option><option>Certificate of Achievement</option><option>Certificate of Participation</option><option>Certificate of Service</option><option>Special Recognition</option></select></div>
+<div><label>Issue Date</label><input id="issueDate" type="date"></div>
+<div><label>Approving Authority</label><input id="approver" placeholder="Name / Designation"></div>
+<div class="full"><label>Recognition Note (Optional)</label><textarea id="message" placeholder="Short note"></textarea></div>
+</div>
+<div class="actions"><button id="saveBtn" type="button" onclick="saveCertificate()">Save Certificate</button></div>
+<div id="saveMsg" class="result">Ready to save records.</div>
+<hr style="margin:25px 0;border:0;border-top:1px solid #ddd">
+<h2 class="title">Certificate Database</h2>
+<input id="searchRecords" placeholder="Search records..." oninput="filterRecords()">
+<p id="recordCount" class="muted">No records loaded.</p><div id="recordsTable" class="table-wrap"></div>
+<hr style="margin:25px 0;border:0;border-top:1px solid #ddd">
+<h2 class="title">Website Gallery Management</h2><p class="muted">Upload hospital activity photographs here. They appear in the public gallery at the bottom of this website, not on certificates.</p>
+<div class="grid">
+<div class="full"><label>Select Activity Photo</label><input id="galleryFile" type="file" accept="image/jpeg,image/png,image/webp"></div>
+<div class="full"><label>Photo Caption (Optional)</label><input id="galleryCaption" placeholder="e.g. Hospital activity / awareness programme"></div>
+</div>
+<div class="actions"><button id="uploadBtn" type="button" onclick="uploadGalleryPhoto()">Upload Photo</button><button class="secondary" type="button" onclick="loadGallery()">Refresh Gallery</button></div>
+<div id="galleryAdminMsg" class="result">Gallery upload is available to authorized admins.</div>
+</div>
 </section>
 
+<section class="card gallery" id="publicGallery">
+<h2 class="title">Hospital Activity Gallery</h2><p class="sub">Selected hospital activities and institutional events.</p>
+<div id="galleryPublicGrid" class="gallery-grid"><p class="muted">Loading gallery...</p></div>
+</section>
 </main>
-
-<footer>
-SBIMS Certificate Database & Verification Portal • Mowa, Raipur, Chhattisgarh
-</footer>
+<footer>SBIMS Certificate Database & Verification Portal • Mowa, Raipur, Chhattisgarh</footer>
 
 <script>
-// SUPABASE CONNECTION SETTINGS
-const SUPABASE_URL = 'https://vgpsszfbpjvyrqhxifyv.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_0YCx7-hA9jOMZeucIAKvqA_v5TuVrXP';
+const SUPABASE_URL='https://vgpsszfbpjvyrqhxifyv.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_0YCx7-hA9jOMZeucIAKvqA_v5TuVrXP';
+const GALLERY_BUCKET='sbims-gallery';
+let accessToken=null;
+let recordsCache=[];
+const $=id=>document.getElementById(id);
 
-let accessToken = null;
-let recordsCache = [];
-
-const $ = id => document.getElementById(id);
-
-function showTab(tab) {
-  $('verify').classList.toggle('hidden',tab !== 'verify');
-  $('admin').classList.toggle('hidden',tab !== 'admin');
-  $('tv').classList.toggle('active',tab === 'verify');
-  $('ta').classList.toggle('active',tab === 'admin');
+function showTab(tab){
+  $('verify').classList.toggle('hidden',tab!=='verify');
+  $('admin').classList.toggle('hidden',tab!=='admin');
+  $('tv').classList.toggle('active',tab==='verify');
+  $('ta').classList.toggle('active',tab==='admin');
 }
+function configured(){return SUPABASE_URL.startsWith('https://')&&SUPABASE_ANON_KEY.startsWith('sb_publishable_');}
+function msg(id,text,kind=''){const el=$(id);el.textContent=text;el.className='result '+kind;}
+function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c]));}
 
-function configured() {
-  return SUPABASE_URL.startsWith('https://') &&
-         SUPABASE_ANON_KEY.startsWith('sb_publishable_');
-}
-
-function msg(id,text,kind='') {
-  const el = $(id);
-  el.textContent = text;
-  el.className = 'result ' + kind;
-}
-
-function esc(value) {
-  return String(value ?? '').replace(/[&<>"']/g,c=>({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
-async function api(path,options={}) {
-  if (!configured()) throw Error('Supabase settings are missing.');
-
-  const headers = {
-    apikey:SUPABASE_ANON_KEY,
-    'Content-Type':'application/json',
-    ...(options.headers || {})
-  };
-
-  if (accessToken) headers.Authorization = 'Bearer ' + accessToken;
-
-  const response = await fetch(
-    SUPABASE_URL + '/rest/v1/' + path,
-    {...options,headers}
-  );
-
-  const body = await response.text();
-  let data = null;
-  try { data = body ? JSON.parse(body) : null; } catch {}
-
-  if (!response.ok) {
-    throw Error(data?.message || data?.msg || 'Request failed: ' + response.status);
-  }
+async function api(path,options={}){
+  if(!configured())throw Error('Supabase settings are missing.');
+  const headers={apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json',...(options.headers||{})};
+  if(accessToken)headers.Authorization='Bearer '+accessToken;
+  const response=await fetch(SUPABASE_URL+'/rest/v1/'+path,{...options,headers});
+  const body=await response.text();let data=null;
+  try{data=body?JSON.parse(body):null;}catch{}
+  if(!response.ok)throw Error(data?.message||data?.msg||data?.error_description||'Request failed: '+response.status);
   return data;
 }
 
-async function verifyCertificate() {
-  const id = $('vid').value.trim().toUpperCase();
-  const code = $('vcode').value.trim().toUpperCase();
-
-  if (!id || !code) {
-    return msg('vr','Enter both Certificate ID and Verification Code.','bad');
-  }
-
-  $('verifyBtn').disabled = true;
-  msg('vr','Checking database...');
-
-  try {
-    const data = await api('rpc/verify_certificate',{
-      method:'POST',
-      body:JSON.stringify({
-        p_certificate_id:id,
-        p_verification_code:code
-      })
+// Original Supabase Auth login and admin_users authorization check are preserved.
+async function signIn(){
+  const email=$('email').value.trim();
+  const password=$('password').value;
+  if(!email||!password)return msg('loginMsg','Enter email and password.','bad');
+  $('loginBtn').disabled=true;msg('loginMsg','Signing in...');
+  try{
+    const response=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{
+      method:'POST',headers:{apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
     });
-
-    const result = Array.isArray(data) ? data[0] : data;
-
-    if (result && result.is_valid) {
-      msg('vr','VALID CERTIFICATE • ' +
-        result.certificate_type + ' • Issue date: ' +
-        result.issue_date,'good');
-    } else {
-      msg('vr','No matching certificate found. Check the ID and code.','bad');
-    }
-  } catch(error) {
-    msg('vr','Verification error: ' + error.message,'bad');
-  } finally {
-    $('verifyBtn').disabled = false;
-  }
-}
-
-async function signIn() {
-  const email = $('email').value.trim();
-  const password = $('password').value;
-
-  if (!email || !password) {
-    return msg('loginMsg','Enter email and password.','bad');
-  }
-
-  $('loginBtn').disabled = true;
-  msg('loginMsg','Signing in...');
-
-  try {
-    const response = await fetch(
-      SUPABASE_URL + '/auth/v1/token?grant_type=password',
-      {
-        method:'POST',
-        headers:{
-          apikey:SUPABASE_ANON_KEY,
-          'Content-Type':'application/json'
-        },
-        body:JSON.stringify({email,password})
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw Error(data.msg || data.message || 'Login failed.');
-    }
-
-    accessToken = data.access_token;
-
-    const allowed = await api(
-      'admin_users?select=user_id&user_id=eq.' +
-      encodeURIComponent(data.user.id) + '&limit=1'
-    );
-
-    if (!allowed || !allowed.length) {
-      accessToken = null;
-      throw Error('This account is not authorized as MRD Admin.');
-    }
-
-    $('loginBox').classList.add('hidden');
-    $('workspace').classList.remove('hidden');
+    const data=await response.json();
+    if(!response.ok)throw Error(data.msg||data.message||'Login failed.');
+    accessToken=data.access_token;
+    const allowed=await api('admin_users?select=user_id&user_id=eq.'+encodeURIComponent(data.user.id)+'&limit=1');
+    if(!allowed||!allowed.length){accessToken=null;throw Error('This account is not authorized as MRD Admin.');}
+    $('loginBox').classList.add('hidden');$('workspace').classList.remove('hidden');
     msg('saveMsg','Admin login successful.','good');
-    await loadRecords();
-
-  } catch(error) {
-    msg('loginMsg',error.message,'bad');
-  } finally {
-    $('loginBtn').disabled = false;
-  }
+    await loadRecords();await loadGallery();
+  }catch(error){accessToken=null;msg('loginMsg',error.message,'bad');}
+  finally{$('loginBtn').disabled=false;}
 }
-
-function signOut() {
-  accessToken = null;
-  recordsCache = [];
-  $('workspace').classList.add('hidden');
-  $('loginBox').classList.remove('hidden');
-  $('password').value = '';
-  $('recordsTable').innerHTML = '';
-  $('recordCount').textContent = 'No records loaded.';
+function signOut(){
+  accessToken=null;recordsCache=[];
+  $('workspace').classList.add('hidden');$('loginBox').classList.remove('hidden');
+  $('password').value='';$('recordsTable').innerHTML='';
+  $('recordCount').textContent='No records loaded.';
   msg('loginMsg','You have signed out.');
 }
-
-async function saveCertificate() {
-  const record = {
+async function verifyCertificate(){
+  const id=$('vid').value.trim().toUpperCase(),code=$('vcode').value.trim().toUpperCase();
+  if(!id||!code)return msg('vr','Enter both Certificate Number and CODE.','bad');
+  $('verifyBtn').disabled=true;msg('vr','Checking database...');
+  try{
+    const data=await api('rpc/verify_certificate',{method:'POST',body:JSON.stringify({p_certificate_id:id,p_verification_code:code})});
+    const result=Array.isArray(data)?data[0]:data;
+    if(result&&result.is_valid)msg('vr','VALID CERTIFICATE • '+result.certificate_type+' • Issue date: '+result.issue_date,'good');
+    else msg('vr','No matching certificate found. Check the Number and CODE.','bad');
+  }catch(error){msg('vr','Verification error: '+error.message,'bad');}
+  finally{$('verifyBtn').disabled=false;}
+}
+function toggleCustomDesignation(){
+  $('customDesignation').classList.toggle('hidden',$('designation').value!=='Other / Custom');
+}
+function selectedDesignation(){
+  return $('designation').value==='Other / Custom'?$('customDesignation').value.trim():$('designation').value;
+}
+async function saveCertificate(){
+  const record={
     recipient_name:$('recipient').value.trim(),
-    designation:$('designation').value.trim(),
+    designation:selectedDesignation(),
     department:$('department').value.trim(),
     certificate_type:$('certType').value,
     issue_date:$('issueDate').value,
     approving_authority:$('approver').value.trim(),
     recognition_note:$('message').value.trim()
   };
-
-  if (!record.recipient_name || !record.designation ||
-      !record.department || !record.issue_date ||
-      !record.approving_authority) {
+  if(!record.recipient_name||!record.designation||!record.department||!record.issue_date||!record.approving_authority)
     return msg('saveMsg','Please fill all required fields.','bad');
-  }
-
-  $('saveBtn').disabled = true;
-
-  try {
-    const rows = await api(
-      'certificates?select=certificate_id,verification_code',
-      {
-        method:'POST',
-        headers:{Prefer:'return=representation'},
-        body:JSON.stringify(record)
-      }
-    );
-
-    const result = rows[0];
-
-    msg('saveMsg',
-      'Certificate saved. ID: ' + result.certificate_id +
-      ' | Verification Code: ' + result.verification_code,
-      'good'
-    );
-
-    ['recipient','designation','department','approver','message']
-      .forEach(id => $(id).value = '');
-
+  $('saveBtn').disabled=true;
+  try{
+    // Keep the original insert payload; database trigger is expected to create certificate ID and code.
+    const rows=await api('certificates?select=certificate_id,verification_code',{
+      method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(record)
+    });
+    const result=rows[0];
+    msg('saveMsg','Certificate saved. Number: '+result.certificate_id+' | CODE: '+result.verification_code,'good');
+    ['recipient','department','approver','message','customDesignation'].forEach(id=>$(id).value='');
+    $('designation').value='';toggleCustomDesignation();
     await loadRecords();
-
-  } catch(error) {
-    msg('saveMsg','Could not save: ' + error.message,'bad');
-  } finally {
-    $('saveBtn').disabled = false;
-  }
+  }catch(error){msg('saveMsg','Could not save: '+error.message,'bad');}
+  finally{$('saveBtn').disabled=false;}
 }
-
-async function loadRecords() {
-  if (!accessToken) return;
-
-  try {
-    recordsCache = await api(
-      'certificates?select=certificate_id,recipient_name,designation,department,certificate_type,issue_date,approving_authority,created_at&order=created_at.desc&limit=500'
-    );
+async function loadRecords(){
+  if(!accessToken)return;
+  try{
+    recordsCache=await api('certificates?select=certificate_id,verification_code,recipient_name,designation,department,certificate_type,issue_date,approving_authority,recognition_note,created_at&order=created_at.desc&limit=500');
     renderRecords();
-  } catch(error) {
-    msg('saveMsg','Could not load records: ' + error.message,'bad');
-  }
+  }catch(error){msg('saveMsg','Could not load records: '+error.message,'bad');}
 }
-
-function filterRecords() {
-  renderRecords();
+function filterRecords(){renderRecords();}
+function certificatePrint(record){
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>SBIMS Certificate</title><style>
+  @page{size:A4 landscape;margin:15mm}body{font-family:Georgia,serif;color:#17394d;margin:0}
+  .sheet{border:8px double #b58b3c;padding:35px;text-align:center;min-height:440px;position:relative}
+  h1{font-size:28px;letter-spacing:1px;margin:12px 0}.sub{font:14px Arial;color:#526879}
+  .type{font-size:23px;margin:28px 0 16px}.name{font-size:32px;font-weight:bold;border-bottom:1px solid #b58b3c;display:inline-block;padding:0 25px 8px}
+  .body{font:16px Arial;line-height:1.7;margin:20px auto;max-width:700px}.meta{display:flex;justify-content:space-between;margin-top:45px;font:12px Arial}
+  .codes{display:flex;justify-content:space-between;margin-top:18px;font:12px Arial}
+  </style></head><body><div class="sheet"><div class="sub">SHRI BALAJI INSTITUTE OF MEDICAL SCIENCE • MOWA, RAIPUR (C.G.)</div>
+  <h1>CERTIFICATE</h1><div class="type">${esc(record.certificate_type)}</div>
+  <div class="sub">This certificate is proudly presented to</div><p class="name">${esc(record.recipient_name)}</p>
+  <div class="body">For ${esc(record.designation)} • ${esc(record.department)}${record.recognition_note?'<br>'+esc(record.recognition_note):''}</div>
+  <div class="meta"><span>Issue Date: ${esc(record.issue_date)}</span><span>Approved by: ${esc(record.approving_authority)}</span></div>
+  <div class="codes"><span>Certificate Number: ${esc(record.certificate_id)}</span><span>CODE: ${esc(record.verification_code||'Not available')}</span></div>
+  </div><script>window.onload=()=>window.print()<\/script></body></html>`;
+  const win=window.open('','_blank');
+  if(!win){alert('Please allow pop-ups to print the certificate.');return;}
+  win.document.open();win.document.write(html);win.document.close();
 }
-
-function renderRecords() {
-  const query = $('searchRecords').value.trim().toLowerCase();
-
-  const list = recordsCache.filter(record =>
-    [
-      record.certificate_id,
-      record.recipient_name,
-      record.department,
-      record.certificate_type,
-      record.designation
-    ].some(value => String(value || '').toLowerCase().includes(query))
-  );
-
-  $('recordCount').textContent = list.length + ' record(s) shown';
-
-  if (!list.length) {
-    $('recordsTable').innerHTML = '<p class="muted">No matching records.</p>';
-    return;
-  }
-
-  $('recordsTable').innerHTML =
-    '<table><thead><tr>' +
-    '<th>Certificate ID</th><th>Recipient</th>' +
-    '<th>Department</th><th>Type</th><th>Issue Date</th>' +
-    '</tr></thead><tbody>' +
-    list.map(record =>
-      '<tr><td>' + esc(record.certificate_id) +
-      '</td><td>' + esc(record.recipient_name) +
-      '</td><td>' + esc(record.department) +
-      '</td><td>' + esc(record.certificate_type) +
-      '</td><td>' + esc(record.issue_date) +
-      '</td></tr>'
-    ).join('') +
+function renderRecords(){
+  const query=$('searchRecords').value.trim().toLowerCase();
+  const list=recordsCache.filter(r=>[r.certificate_id,r.verification_code,r.recipient_name,r.department,r.certificate_type,r.designation]
+    .some(v=>String(v||'').toLowerCase().includes(query)));
+  $('recordCount').textContent=list.length+' record(s) shown';
+  if(!list.length){$('recordsTable').innerHTML='<p class="muted">No matching records.</p>';return;}
+  $('recordsTable').innerHTML='<table><thead><tr><th>Certificate Number</th><th>CODE</th><th>Recipient</th><th>Department</th><th>Type</th><th>Issue Date</th><th>PDF / Print</th></tr></thead><tbody>'+
+    list.map((r,i)=>'<tr><td>'+esc(r.certificate_id)+'</td><td>'+esc(r.verification_code||'—')+'</td><td>'+esc(r.recipient_name)+'</td><td>'+esc(r.department)+'</td><td>'+esc(r.certificate_type)+'</td><td>'+esc(r.issue_date)+'</td><td><button type="button" onclick="certificatePrint(recordsCache['+recordsCache.indexOf(r)+'])">Print / PDF</button></td></tr>').join('')+
     '</tbody></table>';
 }
 
-function localDate() {
-  const date = new Date();
-  const offset = date.getTimezoneOffset() * 60000;
-  return new Date(date.getTime() - offset).toISOString().slice(0,10);
+async function uploadGalleryPhoto(){
+  if(!accessToken)return msg('galleryAdminMsg','Please sign in first.','bad');
+  const file=$('galleryFile').files[0];
+  if(!file)return msg('galleryAdminMsg','Select an image first.','bad');
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type))return msg('galleryAdminMsg','Only JPG, PNG or WEBP images are allowed.','bad');
+  if(file.size>5*1024*1024)return msg('galleryAdminMsg','Image must be 5 MB or smaller.','bad');
+  $('uploadBtn').disabled=true;msg('galleryAdminMsg','Uploading photo...');
+  try{
+    const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+    const path=Date.now()+'_'+safeName;
+    const response=await fetch(SUPABASE_URL+'/storage/v1/object/'+GALLERY_BUCKET+'/'+encodeURIComponent(path),{
+      method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+accessToken,'Content-Type':file.type,'x-upsert':'false'},body:file
+    });
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok)throw Error(data.message||data.error||'Upload failed: '+response.status);
+    const caption=$('galleryCaption').value.trim();
+    if(caption){
+      const capResponse=await api('gallery_captions',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({file_name:path,caption})}).catch(()=>null);
+      // Caption storage is optional; the photo itself remains uploaded if no caption table exists.
+    }
+    $('galleryFile').value='';$('galleryCaption').value='';
+    msg('galleryAdminMsg','Photo uploaded successfully.','good');await loadGallery();
+  }catch(error){msg('galleryAdminMsg','Gallery upload failed: '+error.message,'bad');}
+  finally{$('uploadBtn').disabled=false;}
 }
-
-$('issueDate').value = localDate();
+async function loadGallery(){
+  try{
+    const response=await fetch(SUPABASE_URL+'/storage/v1/object/list/'+GALLERY_BUCKET,{
+      method:'POST',headers:{apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({prefix:'',limit:100,sortBy:{column:'created_at',order:'desc'}})
+    });
+    const data=await response.json();
+    if(!response.ok)throw Error(data.message||'Gallery could not be loaded.');
+    const files=(data||[]).filter(f=>f.name&&!f.name.startsWith('.'));
+    if(!files.length){$('galleryPublicGrid').innerHTML='<p class="muted">No gallery photos have been uploaded yet.</p>';return;}
+    $('galleryPublicGrid').innerHTML=files.map(f=>{
+      const url=SUPABASE_URL+'/storage/v1/object/public/'+GALLERY_BUCKET+'/'+encodeURIComponent(f.name);
+      return '<div class="gallery-item"><img loading="lazy" src="'+url+'" alt="Hospital activity photo"><p>SBIMS Hospital Activity</p></div>';
+    }).join('');
+  }catch(error){$('galleryPublicGrid').innerHTML='<p class="muted">Gallery is not configured yet. Admin can enable it after Storage setup.</p>';}
+}
+function localDate(){const d=new Date(),offset=d.getTimezoneOffset()*60000;return new Date(d.getTime()-offset).toISOString().slice(0,10);}
+$('issueDate').value=localDate();
+loadGallery();
 </script>
-
 </body>
 </html>
