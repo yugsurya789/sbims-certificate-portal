@@ -1,0 +1,630 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SBIMS | Certificate Management Portal</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{font-family:Inter,Arial,sans-serif;background:#f3f5f8;color:#172033}
+.navy{background:#101d35}.gold{color:#b89550}.gold-bg{background:#b89550}
+.btn{padding:10px 16px;border-radius:8px;font-weight:600;font-size:13px}
+.btn-primary{background:#142442;color:white}.btn-gold{background:#b89550;color:#101d35}
+.btn-light{background:#edf1f6;color:#172033}.btn-danger{background:#a83232;color:white}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d5dbe5;border-radius:8px;background:white;font-size:14px}
+label{display:block;font-size:12px;font-weight:700;color:#47536a;margin:0 0 6px}
+.panel{background:white;border:1px solid #e2e7ef;border-radius:12px;padding:18px}
+.tab{padding:10px 13px;border-radius:8px;font-size:13px;font-weight:600}
+.tab.active{background:#142442;color:white}
+#certificate{width:100%;max-width:1100px;min-height:740px;background:#fff;border:12px solid #142442;outline:2px solid #b89550;outline-offset:-19px;padding:48px 60px;margin:auto;position:relative;color:#172033}
+.cert-inner{border:1px solid #d4bd8a;min-height:620px;padding:28px 36px;position:relative}
+.cert-title{font-family:Cinzel,serif;letter-spacing:3px;color:#142442}
+.cert-name{font-family:Cinzel,serif;font-size:34px;font-weight:600;color:#142442;border-bottom:1px solid #c6a96a;display:inline-block;padding:0 20px 8px}
+#qrcode img{margin:auto}
+.hidden{display:none!important}
+@media(max-width:700px){#certificate{min-width:850px} .cert-wrap{overflow-x:auto}.cert-inner{padding:24px}}
+@media print{
+  body *{visibility:hidden!important}
+  #certificate,#certificate *{visibility:visible!important}
+  #certificate{position:absolute;left:0;top:0;width:100%;max-width:none;margin:0;min-height:190mm;box-shadow:none}
+  @page{size:A4 landscape;margin:8mm}
+}
+</style>
+</head>
+<body>
+
+<header class="navy text-white px-4 md:px-8 py-4">
+ <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+  <div class="flex items-center gap-3">
+   <div class="w-12 h-12 rounded-full border-2 border-yellow-600 flex items-center justify-center text-yellow-500 font-bold">SB</div>
+   <div>
+    <div class="font-bold tracking-wide text-sm md:text-lg">SHRI BALAJI INSTITUTE OF MEDICAL SCIENCE</div>
+    <div class="text-xs text-slate-300">MRD • Mowa, Raipur, Chhattisgarh</div>
+   </div>
+  </div>
+  <button id="loginTop" class="btn btn-gold" onclick="showLogin()">Admin Login</button>
+ </div>
+</header>
+
+<main class="max-w-7xl mx-auto p-4 md:p-7">
+ <section id="publicSection" class="max-w-3xl mx-auto mt-5">
+  <div class="text-center mb-6">
+   <div class="text-xs tracking-[4px] gold font-bold">OFFICIAL RECORDS</div>
+   <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mt-2">Certificate Verification</h1>
+   <p class="text-sm text-slate-500 mt-2">Verify the authenticity of an SBIMS certificate</p>
+  </div>
+  <div class="panel shadow-sm">
+   <label for="publicCertNo">Certificate Number</label>
+   <div class="flex flex-col sm:flex-row gap-2">
+    <input id="publicCertNo" placeholder="Example: SBIMS202600001" autocomplete="off">
+    <button class="btn btn-primary" onclick="verifyPublic()">Verify Certificate</button>
+   </div>
+   <div id="publicMessage" class="text-sm mt-3"></div>
+  </div>
+  <div id="publicResult" class="panel mt-4 hidden"></div>
+ </section>
+
+ <section id="adminSection" class="hidden mt-4">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+   <div><h1 class="text-2xl font-bold">MRD Admin Workspace</h1><p class="text-xs text-slate-500">Certificate management system</p></div>
+   <button class="btn btn-danger" onclick="logout()">Sign Out</button>
+  </div>
+  <nav class="flex flex-wrap gap-2 mb-5">
+   <button class="tab active" data-tab="create" onclick="switchTab('create',this)">Create Certificate</button>
+   <button class="tab" data-tab="register" onclick="switchTab('register',this)">Certificate Register</button>
+   <button class="tab" data-tab="logs" onclick="switchTab('logs',this)">Activity Logs</button>
+   <button class="tab" data-tab="verify" onclick="switchTab('verify',this)">Public Verification</button>
+  </nav>
+
+  <section id="tab-create" class="panel">
+   <h2 class="font-bold text-lg mb-4" id="formHeading">Create New Certificate</h2>
+   <form id="certForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div><label>Recipient Name *</label><input id="recipient" required maxlength="150" placeholder="Full name"></div>
+    <div>
+     <label>Designation *</label>
+     <select id="designation" required onchange="toggleCustomDesignation()">
+      <option value="">Select designation</option>
+      <option>Doctor</option><option>Nursing Officer</option><option>Staff Nurse</option>
+      <option>Medical Officer</option><option>Technician</option><option>Pharmacist</option>
+      <option>Administrative Staff</option><option>Intern</option><option>Student</option>
+      <option value="OTHER">Other / Custom</option>
+     </select>
+     <input id="customDesignation" class="hidden mt-2" placeholder="Enter designation">
+    </div>
+    <div><label>Department *</label><input id="department" required maxlength="120" placeholder="Department name"></div>
+    <div>
+     <label>Certificate Type *</label>
+     <select id="certificateType" required>
+      <option value="">Select type</option>
+      <option>Appreciation</option><option>Achievement</option><option>Participation</option>
+      <option>Training</option><option>Experience</option><option>Internship</option>
+      <option>Recognition</option><option>Other</option>
+     </select>
+    </div>
+    <div><label>Issue Date *</label><input id="issueDate" type="date" required></div>
+    <div><label>Approving Authority *</label><input id="authority" required maxlength="150" placeholder="Name / designation"></div>
+    <div class="md:col-span-2"><label>Remarks / Recognition Note</label><textarea id="remarks" rows="3" maxlength="500" placeholder="Optional certificate note"></textarea></div>
+    <div class="md:col-span-2 flex flex-wrap gap-2">
+     <button type="button" class="btn btn-light" onclick="previewCertificate()">Preview Certificate</button>
+     <button type="submit" class="btn btn-primary" id="saveBtn">Save Certificate</button>
+     <button type="button" class="btn btn-light hidden" id="cancelEdit" onclick="resetForm()">Cancel Edit</button>
+    </div>
+   </form>
+   <div id="formMessage" class="text-sm mt-4"></div>
+  </section>
+
+  <section id="tab-register" class="panel hidden">
+   <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+    <h2 class="font-bold text-lg">Certificate Register</h2>
+    <button class="btn btn-light" onclick="loadRegister()">Refresh</button>
+   </div>
+   <input id="registerSearch" placeholder="Search certificate number, name or department..." oninput="renderRegister()">
+   <div class="overflow-x-auto mt-4">
+    <table class="w-full text-sm min-w-[750px]">
+     <thead><tr class="text-left bg-slate-100"><th class="p-3">Certificate No.</th><th class="p-3">Recipient</th><th class="p-3">Department</th><th class="p-3">Date</th><th class="p-3">Status</th><th class="p-3">Actions</th></tr></thead>
+     <tbody id="registerBody"><tr><td colspan="6" class="p-4 text-slate-500">Loading records...</td></tr></tbody>
+    </table>
+   </div>
+  </section>
+
+  <section id="tab-logs" class="panel hidden">
+   <div class="flex justify-between items-center mb-4"><h2 class="font-bold text-lg">Activity Logs</h2><button class="btn btn-light" onclick="loadLogs()">Refresh</button></div>
+   <div id="logsBody" class="text-sm text-slate-600">Loading...</div>
+  </section>
+
+  <section id="tab-verify" class="panel hidden">
+   <h2 class="font-bold text-lg mb-3">Public Verification</h2>
+   <p class="text-sm text-slate-600">Use the public verification page to check a certificate number. Admin records remain protected.</p>
+   <button class="btn btn-primary mt-3" onclick="window.scrollTo({top:0,behavior:'smooth'})">Go to Verification</button>
+  </section>
+ </section>
+</main>
+
+<!-- Certificate preview -->
+<div id="previewModal" class="hidden fixed inset-0 z-50 bg-black/70 overflow-auto p-3 md:p-8">
+ <div class="max-w-6xl mx-auto bg-white rounded-xl p-3 md:p-5">
+  <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+   <h2 class="font-bold">Certificate Preview</h2>
+   <div class="flex gap-2">
+    <button class="btn btn-gold" onclick="downloadPDF()">Download PDF</button>
+    <button class="btn btn-primary" onclick="printCert()">Print</button>
+    <button class="btn btn-light" onclick="closePreview()">Close</button>
+   </div>
+  </div>
+  <div class="cert-wrap">
+   <div id="certificate">
+    <div class="cert-inner">
+     <div class="flex justify-between items-start">
+      <div class="w-20 h-20 border-2 border-yellow-700 rounded-full flex items-center justify-center text-xl font-bold text-yellow-700">SBIMS</div>
+      <div class="text-center flex-1 px-3">
+       <div class="text-xs tracking-[3px] gold font-bold">SHRI BALAJI INSTITUTE OF MEDICAL SCIENCE</div>
+       <div class="text-xs text-slate-500 mt-1">Mowa, Raipur, Chhattisgarh</div>
+       <h2 class="cert-title text-3xl font-bold mt-5">CERTIFICATE</h2>
+       <div class="text-xs tracking-[4px] text-slate-500 mt-1">OF RECOGNITION</div>
+      </div>
+      <div class="w-20 text-center text-xs text-slate-500">OFFICIAL<br>RECORD</div>
+     </div>
+     <div class="text-center mt-9">
+      <p class="text-sm italic text-slate-500">This certificate is proudly presented to</p>
+      <div id="pName" class="cert-name mt-4">Recipient Name</div>
+      <p class="text-sm text-slate-600 mt-5">For their contribution and association as</p>
+      <div id="pDesignation" class="text-lg font-semibold mt-2">Designation</div>
+      <div id="pDepartment" class="text-sm text-slate-500 mt-1">Department</div>
+      <p id="pNote" class="max-w-2xl mx-auto text-sm leading-7 mt-6">In recognition of valuable contribution and dedicated service.</p>
+      <div id="pType" class="text-xs tracking-[3px] gold font-bold mt-4">APPRECIATION</div>
+     </div>
+     <div class="flex justify-between items-end mt-12 gap-5">
+      <div class="text-center min-w-[150px]">
+       <div class="border-t border-slate-500 pt-2 text-xs">Date of Issue</div>
+       <div id="pDate" class="text-sm font-semibold">DD-MM-YYYY</div>
+      </div>
+      <div class="text-center min-w-[150px]">
+       <div id="qrcode" class="mb-2 flex justify-center"></div>
+       <div class="text-[10px] text-slate-500">Scan to verify</div>
+      </div>
+      <div class="text-center min-w-[180px]">
+       <div class="border-t border-slate-500 pt-2 text-xs">Authorized Signatory</div>
+       <div id="pAuthority" class="text-sm font-semibold mt-1">Approving Authority</div>
+      </div>
+     </div>
+     <div class="absolute bottom-2 left-0 right-0 text-center text-[10px] text-slate-400">Certificate No: <span id="pCertId">Generated after saving</span></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- Login modal -->
+<div id="loginModal" class="hidden fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+ <div class="bg-white rounded-xl p-6 w-full max-w-md">
+  <h2 class="text-xl font-bold mb-1">MRD Admin Login</h2>
+  <p class="text-xs text-slate-500 mb-5">Authorized staff only</p>
+  <form id="loginForm" class="space-y-3">
+   <div><label>Email</label><input id="loginEmail" type="email" required autocomplete="username"></div>
+   <div><label>Password</label><input id="loginPassword" type="password" required autocomplete="current-password"></div>
+   <div id="loginMessage" class="text-sm"></div>
+   <div class="flex gap-2"><button class="btn btn-primary flex-1" type="submit">Sign In</button><button type="button" class="btn btn-light" onclick="hideLogin()">Cancel</button></div>
+  </form>
+ </div>
+</div>
+
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-[90] hidden rounded-lg bg-slate-900 text-white px-5 py-3 text-sm shadow-lg"></div>
+
+<script>
+'use strict';
+
+/* Existing Supabase project credentials */
+const SUPABASE_URL = 'https://vgpsszfbpjvyrqhxifyv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0YCx7-hA9jOMZeucIAKvqA_v5TuVrXP';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null;
+let records = [];
+let editingId = null;
+let previewRecord = null;
+
+const $ = id => document.getElementById(id);
+const safe = value => String(value ?? '').replace(/[&<>"']/g, c => ({
+ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+const todayLocal = () => {
+ const d = new Date();
+ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+};
+const dateDisplay = value => {
+ if (!value) return '—';
+ const parts = String(value).slice(0,10).split('-');
+ return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : safe(value);
+};
+function toast(message) {
+ $('toast').textContent = message;
+ $('toast').classList.remove('hidden');
+ setTimeout(() => $('toast').classList.add('hidden'), 3200);
+}
+function message(id, text, error=false) {
+ $(id).textContent = text;
+ $(id).className = 'text-sm mt-3 ' + (error ? 'text-red-700' : 'text-green-700');
+}
+function showLogin(){ $('loginModal').classList.remove('hidden'); }
+function hideLogin(){ $('loginModal').classList.add('hidden'); }
+function switchTab(name, button) {
+ document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden'));
+ $('tab-'+name).classList.remove('hidden');
+ document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+ if (button) button.classList.add('active');
+ if (name === 'register') loadRegister();
+ if (name === 'logs') loadLogs();
+}
+function toggleCustomDesignation() {
+ const custom = $('designation').value === 'OTHER';
+ $('customDesignation').classList.toggle('hidden', !custom);
+ $('customDesignation').required = custom;
+}
+function getDesignation() {
+ return $('designation').value === 'OTHER'
+  ? $('customDesignation').value.trim()
+  : $('designation').value;
+}
+function formData() {
+ return {
+  recipient_name: $('recipient').value.trim(),
+  designation: getDesignation(),
+  department: $('department').value.trim(),
+  certificate_type: $('certificateType').value,
+  issue_date: $('issueDate').value,
+  approving_authority: $('authority').value.trim(),
+  recognition_note: $('remarks').value.trim()
+ };
+}
+function validateData(d) {
+ if (!d.recipient_name || !d.designation || !d.department || !d.certificate_type ||
+     !d.issue_date || !d.approving_authority) {
+  throw new Error('Please fill all required fields.');
+ }
+ return d;
+}
+async function adminCheck() {
+ const {data,error} = await db.rpc('sbims_is_admin');
+ if (error) throw error;
+ return data === true;
+}
+async function logAction(action, certId, details='') {
+ const {error} = await db.from('activity_logs').insert({
+  user_id: currentUser.id, action, certificate_id: certId || null, details
+ });
+ if (error) console.error('Activity log error:', error.message);
+}
+async function checkSession() {
+ const {data:{session},error} = await db.auth.getSession();
+ if (error) console.error(error);
+ if (!session) return;
+ try {
+  if (await adminCheck()) enterAdmin(session.user);
+  else {
+   await db.auth.signOut();
+   toast('This account is not authorized as an MRD admin.');
+  }
+ } catch(e) {
+  console.error(e);
+  toast('Admin authorization could not be checked. Run the SQL setup first.');
+ }
+}
+function enterAdmin(user) {
+ currentUser = user;
+ $('publicSection').classList.add('hidden');
+ $('adminSection').classList.remove('hidden');
+ $('loginTop').classList.add('hidden');
+ $('issueDate').value = todayLocal();
+ loadRegister();
+}
+async function logout() {
+ await db.auth.signOut();
+ currentUser = null;
+ $('adminSection').classList.add('hidden');
+ $('publicSection').classList.remove('hidden');
+ $('loginTop').classList.remove('hidden');
+ resetForm();
+ toast('Signed out.');
+}
+$('loginForm').addEventListener('submit', async e => {
+ e.preventDefault();
+ message('loginMessage','Signing in...');
+ const {data,error} = await db.auth.signInWithPassword({
+  email:$('loginEmail').value.trim(), password:$('loginPassword').value
+ });
+ if (error) return message('loginMessage',error.message,true);
+ try {
+  if (!(await adminCheck())) {
+   await db.auth.signOut();
+   return message('loginMessage','This account is not in the authorized admin list.',true);
+  }
+  hideLogin();
+  enterAdmin(data.user);
+  toast('Admin login successful.');
+ } catch(err) {
+  await db.auth.signOut();
+  message('loginMessage','Authorization check failed: '+err.message,true);
+ }
+});
+
+async function verifyPublic() {
+ const certNo = $('publicCertNo').value.trim().toUpperCase();
+ $('publicResult').classList.add('hidden');
+ if (!certNo) return message('publicMessage','Enter a certificate number.',true);
+ message('publicMessage','Checking official records...');
+ try {
+  const {data,error} = await db.rpc('verify_certificate_public',{cert_num:certNo});
+  if (error) throw error;
+  const rec = Array.isArray(data) ? data[0] : data;
+  if (!rec) {
+   message('publicMessage','No certificate found with this number.',true);
+   return;
+  }
+  const active = String(rec.status || 'ACTIVE').toUpperCase() === 'ACTIVE';
+  $('publicResult').innerHTML = `
+   <div class="flex items-center justify-between gap-3 flex-wrap">
+    <h3 class="font-bold text-lg">Certificate Record</h3>
+    <span class="text-xs font-bold px-3 py-1 rounded-full ${active?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${active?'VALID / ACTIVE':'REVOKED / CANCELLED'}</span>
+   </div>
+   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm">
+    <div><div class="text-slate-500 text-xs">Certificate Number</div><b>${safe(rec.certificate_id)}</b></div>
+    <div><div class="text-slate-500 text-xs">Recipient</div><b>${safe(rec.recipient_name)}</b></div>
+    <div><div class="text-slate-500 text-xs">Designation</div><b>${safe(rec.designation)}</b></div>
+    <div><div class="text-slate-500 text-xs">Department</div><b>${safe(rec.department)}</b></div>
+    <div><div class="text-slate-500 text-xs">Certificate Type</div><b>${safe(rec.certificate_type)}</b></div>
+    <div><div class="text-slate-500 text-xs">Issue Date</div><b>${dateDisplay(rec.issue_date)}</b></div>
+    <div><div class="text-slate-500 text-xs">Approving Authority</div><b>${safe(rec.approving_authority)}</b></div>
+   </div>
+   ${rec.recognition_note?`<div class="mt-4 text-sm"><span class="text-slate-500">Remarks:</span> ${safe(rec.recognition_note)}</div>`:''}
+   <p class="text-xs text-slate-400 mt-5">This result is retrieved from the SBIMS certificate verification database.</p>`;
+  $('publicResult').classList.remove('hidden');
+  message('publicMessage','Verification record retrieved.');
+ } catch(e) {
+  console.error(e);
+  message('publicMessage','Verification service error. Please contact the MRD office.',true);
+ }
+}
+$('publicCertNo').addEventListener('keydown',e=>{if(e.key==='Enter')verifyPublic()});
+
+function fillCertificate(d, certId='Pending ID') {
+ $('pName').textContent = d.recipient_name || 'Recipient Name';
+ $('pDesignation').textContent = d.designation || 'Designation';
+ $('pDepartment').textContent = d.department || 'Department';
+ $('pNote').textContent = d.recognition_note || 'In recognition of valuable contribution and dedicated service.';
+ $('pType').textContent = (d.certificate_type || 'CERTIFICATE').toUpperCase();
+ $('pDate').textContent = dateDisplay(d.issue_date);
+ $('pAuthority').textContent = d.approving_authority || 'Approving Authority';
+ $('pCertId').textContent = certId;
+ $('qrcode').innerHTML = '';
+ if (certId && certId !== 'Pending ID' && certId !== 'Generated after saving') {
+  const verifyUrl = `${location.origin}${location.pathname}?id=${encodeURIComponent(certId)}`;
+  new QRCode($('qrcode'),{text:verifyUrl,width:78,height:78,colorDark:'#142442',colorLight:'#ffffff'});
+ }
+}
+function previewCertificate() {
+ try {
+  const d = validateData(formData());
+  previewRecord = d;
+  fillCertificate(d, editingId ? 'Existing ID — unchanged' : 'Generated after saving');
+  $('previewModal').classList.remove('hidden');
+ } catch(e) { message('formMessage',e.message,true); }
+}
+function closePreview(){ $('previewModal').classList.add('hidden'); }
+async function downloadPDF() {
+ const element = $('certificate');
+ try {
+  await html2pdf().set({
+   margin:5, filename:`SBIMS-Certificate-${(previewRecord?.recipient_name||'Preview').replace(/[^a-z0-9-_]/gi,'_')}.pdf`,
+   image:{type:'jpeg',quality:0.98},
+   html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},
+   jsPDF:{unit:'mm',format:'a4',orientation:'landscape'}
+  }).from(element).save();
+ } catch(e) { toast('PDF could not be generated: '+e.message); }
+}
+function printCert(){ window.print(); }
+
+$('certForm').addEventListener('submit', async e => {
+ e.preventDefault();
+ const btn = $('saveBtn');
+ btn.disabled = true;
+ btn.textContent = 'Saving...';
+ try {
+  const d = validateData(formData());
+  let result;
+  if (editingId) {
+   result = await db.from('certificates').update(d).eq('id',editingId)
+    .select('certificate_id').single();
+  } else {
+   // Certificate number is generated by your existing database trigger.
+   result = await db.from('certificates').insert(d)
+    .select('certificate_id').single();
+  }
+  if (result.error) throw result.error;
+  const certId = result.data?.certificate_id;
+  if (!certId) throw new Error('Saved, but certificate number was not returned. Check the existing ID trigger.');
+  await logAction(editingId?'EDIT_CERTIFICATE':'CREATE_CERTIFICATE',certId,
+   editingId?'Certificate details updated':'New certificate created');
+  previewRecord = d;
+  fillCertificate(d,certId);
+  $('previewModal').classList.remove('hidden');
+  message('formMessage',`Certificate saved successfully. Number: ${certId}`);
+  resetForm();
+  await loadRegister();
+ } catch(err) {
+  console.error(err);
+  message('formMessage','Save failed: '+err.message,true);
+ } finally {
+  btn.disabled = false;
+  btn.textContent = 'Save Certificate';
+ }
+});
+
+function resetForm() {
+ editingId = null;
+ $('certForm').reset();
+ $('issueDate').value = todayLocal();
+ $('formHeading').textContent = 'Create New Certificate';
+ $('saveBtn').textContent = 'Save Certificate';
+ $('cancelEdit').classList.add('hidden');
+ $('customDesignation').classList.add('hidden');
+ $('customDesignation').required = false;
+}
+async function loadRegister() {
+ if (!currentUser) return;
+ $('registerBody').innerHTML = '<tr><td colspan="6" class="p-4">Loading records...</td></tr>';
+ const {data,error} = await db.from('certificates')
+  .select('id,certificate_id,recipient_name,designation,department,certificate_type,issue_date,approving_authority,recognition_note,status,cancelled_at,cancellation_reason')
+  .order('created_at',{ascending:false}).limit(500);
+ if (error) {
+  $('registerBody').innerHTML = `<tr><td colspan="6" class="p-4 text-red-700">${safe(error.message)}</td></tr>`;
+  return;
+ }
+ records = data || [];
+ renderRegister();
+}
+function renderRegister() {
+ const q = $('registerSearch').value.trim().toLowerCase();
+ const filtered = records.filter(r =>
+  [r.certificate_id,r.recipient_name,r.department,r.designation]
+   .some(v=>String(v||'').toLowerCase().includes(q))
+ );
+ if (!filtered.length) {
+  $('registerBody').innerHTML='<tr><td colspan="6" class="p-4 text-slate-500">No records found.</td></tr>';
+  return;
+ }
+ $('registerBody').innerHTML = filtered.map(r => {
+  const active = String(r.status||'ACTIVE').toUpperCase()==='ACTIVE';
+  return `<tr class="border-b">
+   <td class="p-3 font-semibold">${safe(r.certificate_id)}</td>
+   <td class="p-3">${safe(r.recipient_name)}</td>
+   <td class="p-3">${safe(r.department)}</td>
+   <td class="p-3">${dateDisplay(r.issue_date)}</td>
+   <td class="p-3"><span class="${active?'text-green-700':'text-red-700'} font-bold">${active?'ACTIVE':'REVOKED'}</span></td>
+   <td class="p-3"><div class="flex flex-wrap gap-1">
+    <button class="btn btn-light" onclick="editRecord('${r.id}')">Edit</button>
+    <button class="btn btn-light" onclick="reissueRecord('${r.id}')">Reissue</button>
+    ${active?`<button class="btn btn-danger" onclick="revokeRecord('${r.id}')">Revoke</button>`:''}
+   </div></td></tr>`;
+ }).join('');
+}
+async function editRecord(id) {
+ const r = records.find(x=>String(x.id)===String(id));
+ if (!r) return;
+ editingId = r.id;
+ $('recipient').value = r.recipient_name || '';
+ $('department').value = r.department || '';
+ $('certificateType').value = r.certificate_type || '';
+ $('issueDate').value = String(r.issue_date||'').slice(0,10);
+ $('authority').value = r.approving_authority || '';
+ $('remarks').value = r.recognition_note || '';
+ const known = [...$('designation').options].some(o=>o.value===r.designation);
+ if (known) {
+  $('designation').value = r.designation;
+  $('customDesignation').value = '';
+ } else {
+  $('designation').value = 'OTHER';
+  $('customDesignation').value = r.designation || '';
+ }
+ toggleCustomDesignation();
+ $('formHeading').textContent = 'Edit Certificate — '+r.certificate_id;
+ $('saveBtn').textContent = 'Update Certificate';
+ $('cancelEdit').classList.remove('hidden');
+ switchTab('create',document.querySelector('[data-tab="create"]'));
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+async function revokeRecord(id) {
+ const r = records.find(x=>String(x.id)===String(id));
+ if (!r || !confirm(`Revoke certificate ${r.certificate_id}? This will mark it invalid for public verification.`)) return;
+ const reason = prompt('Reason for revocation (required):');
+ if (!reason || !reason.trim()) return toast('Revocation cancelled. A reason is required.');
+ const {error} = await db.from('certificates').update({
+  status:'REVOKED',cancelled_at:new Date().toISOString(),
+  cancelled_by:currentUser.id,cancellation_reason:reason.trim()
+ }).eq('id',id);
+ if (error) return toast('Revocation failed: '+error.message);
+ await logAction('REVOKE_CERTIFICATE',r.certificate_id,reason.trim());
+ toast('Certificate revoked.');
+ loadRegister();
+}
+async function reissueRecord(id) {
+ const r = records.find(x=>String(x.id)===String(id));
+ if (!r) return;
+ if (String(r.status||'ACTIVE').toUpperCase()!=='ACTIVE') return toast('Only active certificates can be reissued.');
+ if (!confirm(`Create a new certificate for ${r.recipient_name} and revoke the old one?`)) return;
+ const reason = prompt('Reason for reissue (required):');
+ if (!reason || !reason.trim()) return toast('Reissue cancelled. A reason is required.');
+ try {
+  const newData = {
+   recipient_name:r.recipient_name,designation:r.designation,department:r.department,
+   certificate_type:r.certificate_type,issue_date:todayLocal(),
+   approving_authority:r.approving_authority,
+   recognition_note:r.recognition_note || ''
+  };
+  const created = await db.from('certificates').insert(newData).select('certificate_id').single();
+  if (created.error) throw created.error;
+  const newId = created.data.certificate_id;
+  const revoked = await db.from('certificates').update({
+   status:'REVOKED',cancelled_at:new Date().toISOString(),
+   cancelled_by:currentUser.id,cancellation_reason:reason.trim(),replaced_by:newId
+  }).eq('id',id);
+  if (revoked.error) {
+   toast(`New certificate ${newId} created, but old certificate could not be revoked. Contact admin immediately.`);
+   await logAction('REISSUE_PARTIAL_FAILURE',newId,`Old certificate ${r.certificate_id} still needs revocation: ${revoked.error.message}`);
+   await loadRegister();
+   return;
+  }
+  await logAction('REISSUE_CERTIFICATE',newId,`Replaced ${r.certificate_id}. Reason: ${reason.trim()}`);
+  toast(`Reissued successfully. New number: ${newId}`);
+  await loadRegister();
+ } catch(e) {
+  toast('Reissue failed: '+e.message);
+ }
+}
+async function loadLogs() {
+ if (!currentUser) return;
+ $('logsBody').textContent = 'Loading activity...';
+ const {data,error} = await db.from('activity_logs')
+  .select('action,certificate_id,details,created_at')
+  .order('created_at',{ascending:false}).limit(100);
+ if (error) {
+  $('logsBody').textContent = 'Could not load activity logs: '+error.message;
+  return;
+ }
+ if (!data?.length) {
+  $('logsBody').textContent = 'No activity recorded yet.';
+  return;
+ }
+ $('logsBody').innerHTML = data.map(l=>`
+  <div class="border-b py-3">
+   <div class="font-bold">${safe(l.action)} <span class="font-normal text-slate-500">${safe(l.certificate_id||'')}</span></div>
+   <div>${safe(l.details||'')}</div>
+   <div class="text-xs text-slate-400 mt-1">${safe(new Date(l.created_at).toLocaleString())}</div>
+  </div>`).join('');
+}
+
+// QR verification links automatically fill the public certificate number.
+const urlParams = new URLSearchParams(location.search);
+const queryCert = urlParams.get('id');
+if (queryCert) {
+ $('publicCertNo').value = queryCert;
+ setTimeout(verifyPublic,500);
+}
+$('issueDate').value = todayLocal();
+db.auth.onAuthStateChange((event,session)=>{
+ if (event==='SIGNED_OUT') {
+  currentUser=null;
+  $('adminSection').classList.add('hidden');
+  $('publicSection').classList.remove('hidden');
+  $('loginTop').classList.remove('hidden');
+ }
+});
+checkSession();
+</script>
+</body>
+</html>
